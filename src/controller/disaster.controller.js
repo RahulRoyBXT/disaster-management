@@ -1,81 +1,15 @@
+import { Prisma } from '@prisma/client';
+import { ApiError } from '../utils/apiError.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
-import {
-  createDisasterSchema,
-  querySchema,
-  updateDisasterSchema,
-} from '../validation/disaster.validation.js';
 
 export const getAllDisasters = asyncHandler(async (req, res) => {
   try {
-    const { error, value } = querySchema.validate(req.query);
-    if (error) {
-      return res.status(400).json({
-        success: false,
-        error: error.details[0].message,
-      });
+    const disaster = Prisma.disaster.findMany();
+    if (!disaster) {
+      throw new ApiError(400, 'No Disaster Found');
     }
-
-    const { page, limit, owner_id, tags, search, lat, lng, radius } = value;
-    const offset = (page - 1) * limit;
-
-    let disasters;
-    let total;
-
-    // Geographic search
-    if (lat && lng) {
-      disasters = await disasterModel.findNearby(lat, lng, radius);
-      total = disasters.length;
-
-      // Apply pagination to nearby results
-      disasters = disasters.slice(offset, offset + limit);
-    }
-    // Tag-based search
-    else if (tags) {
-      const tagArray = tags.split(',').map(tag => tag.trim());
-      disasters = await disasterModel.findByTags(tagArray);
-      total = disasters.length;
-
-      // Apply pagination
-      disasters = disasters.slice(offset, offset + limit);
-    }
-    // Text search
-    else if (search) {
-      disasters = await disasterModel.search(search);
-      total = disasters.length;
-
-      // Apply pagination
-      disasters = disasters.slice(offset, offset + limit);
-    }
-    // Regular filtered query
-    else {
-      const filters = {};
-      if (owner_id) filters.owner_id = owner_id;
-
-      disasters = await disasterModel.findAll(filters, {
-        limit,
-        offset,
-        orderBy: { column: 'created_at', ascending: false },
-      });
-
-      total = await disasterModel.count(filters);
-    }
-
-    const totalPages = Math.ceil(total / limit);
-
-    res.json({
-      success: true,
-      data: disasters,
-      pagination: {
-        page,
-        limit,
-        total,
-        totalPages,
-        hasNextPage: page < totalPages,
-        hasPrevPage: page > 1,
-      },
-    });
+    return new ApiResponse(200, disaster, 'Disaster fetched');
   } catch (error) {
-    logger.error('Error fetching disasters:', error);
     res.status(500).json({
       success: false,
       error: 'Failed to fetch disasters',
@@ -85,21 +19,20 @@ export const getAllDisasters = asyncHandler(async (req, res) => {
 
 export const getDisasterById = asyncHandler(async (req, res) => {
   try {
-    const disaster = await disasterModel.findById(req.params.id);
-
-    if (!disaster) {
-      return res.status(404).json({
-        success: false,
-        error: 'Disaster not found',
-      });
+    const disasterId = req.params.id;
+    if (!disasterId) {
+      throw new ApiError(400, 'Disaster id is required');
     }
-
-    res.json({
-      success: true,
-      data: disaster,
+    const disaster = await Prisma.disaster.findUnique({
+      where: {
+        id: disasterId,
+      },
     });
+    if (!disaster) {
+      throw new ApiError(404, 'No Disaster Found');
+    }
+    return new ApiResponse(200, disaster, 'Disaster Found successfully');
   } catch (error) {
-    logger.error('Error fetching disaster:', error);
     res.status(500).json({
       success: false,
       error: 'Failed to fetch disaster',
@@ -110,31 +43,36 @@ export const getDisasterById = asyncHandler(async (req, res) => {
 // Create Disaster
 export const createDisaster = asyncHandler(async (req, res) => {
   try {
-    const { error, value } = createDisasterSchema.validate(req.body);
-    if (error) {
-      return res.status(400).json({
-        success: false,
-        error: error.details[0].message,
-      });
+    const { title, locationName, latitude, longitude, description, tags, auditTrail } = req.body;
+
+    if (
+      !title ||
+      !locationName ||
+      !latitude ||
+      !longitude ||
+      !description ||
+      !tags ||
+      !auditTrail
+    ) {
+      throw new ApiError(400, 'All fields are required');
     }
-
-    const disaster = await disasterModel.createWithLocation(value);
-
-    // Add initial audit trail entry
-    await disasterModel.addAuditTrail(disaster.id, 'created', value.owner_id);
-
-    logger.info(`Created disaster: ${disaster.title} by ${value.owner_id}`);
-
-    res.status(201).json({
-      success: true,
-      data: disaster,
-      message: 'Disaster created successfully',
+    const disaster = await Prisma.disaster.create({
+      data: {
+        title,
+        ownerId: req.user.id,
+        locationName,
+        latitude,
+        longitude,
+        description,
+        tags,
+        auditTrail,
+      },
     });
+    return res.status(201).json(new ApiResponse(201, disaster, 'Disaster Created successfully'));
   } catch (error) {
-    logger.error('Error creating disaster:', error);
     res.status(500).json({
       success: false,
-      error: 'Failed to create disaster',
+      error: 'Failed to fetch disasters',
     });
   }
 });
@@ -143,47 +81,32 @@ export const createDisaster = asyncHandler(async (req, res) => {
 
 export const updateDisaster = asyncHandler(async (req, res) => {
   try {
-    const { error, value } = updateDisasterSchema.validate(req.body);
-    if (error) {
-      return res.status(400).json({
-        success: false,
-        error: error.details[0].message,
-      });
+    const disasterId = req.params.id;
+    const { key, value } = req.body;
+    if (!key || !value) {
+      throw new ApiError(400, 'Nothing To Update');
     }
-
-    // Check if disaster exists
-    const existingDisaster = await disasterModel.findById(req.params.id);
-    if (!existingDisaster) {
-      return res.status(404).json({
-        success: false,
-        error: 'Disaster not found',
-      });
+    if (!disasterId) {
+      throw new ApiError(400, 'Disaster Id Not Found');
     }
-
-    // Prepare update data
-    let updateData = { ...value };
-
-    // Handle location update
-    if (value.latitude && value.longitude) {
-      updateData.location = `POINT(${value.longitude} ${value.latitude})`;
-      delete updateData.latitude;
-      delete updateData.longitude;
-    }
-
-    const updatedDisaster = await disasterModel.update(req.params.id, updateData);
-
-    // Add audit trail entry
-    await disasterModel.addAuditTrail(req.params.id, 'updated', req.body.updated_by || 'system');
-
-    logger.info(`Updated disaster: ${req.params.id}`);
-
-    res.json({
-      success: true,
-      data: updatedDisaster,
-      message: 'Disaster updated successfully',
+    const disaster = await Prisma.disaster.findUnique({
+      where: {
+        id: disasterId,
+      },
     });
+    if (!disaster) {
+      throw new ApiError(400, 'Invalid Disaster ID');
+    }
+    const updatedDisaster = await Prisma.disaster.update({
+      where: {
+        disasterId,
+      },
+      data: {
+        key: value,
+      },
+    });
+    return new ApiResponse(200, updateDisaster, 'Disaster Updated');
   } catch (error) {
-    logger.error('Error updating disaster:', error);
     res.status(500).json({
       success: false,
       error: 'Failed to update disaster',
@@ -195,24 +118,25 @@ export const updateDisaster = asyncHandler(async (req, res) => {
 
 export const deleteDisaster = asyncHandler(async (req, res) => {
   try {
-    const disaster = await disasterModel.findById(req.params.id);
-    if (!disaster) {
-      return res.status(404).json({
-        success: false,
-        error: 'Disaster not found',
-      });
+    const disasterId = req.params.id;
+    if (!disasterId) {
+      throw new ApiError(400, 'Disaster Id is Required');
     }
-
-    await disasterModel.delete(req.params.id);
-
-    logger.info(`Deleted disaster: ${req.params.id}`);
-
-    res.json({
-      success: true,
-      message: 'Disaster deleted successfully',
+    const disaster = await Prisma.disaster.findUnique({
+      where: {
+        id: disasterId,
+      },
     });
+    if (!disaster) {
+      throw new ApiError(400, 'Invalid Disaster Id');
+    }
+    const deletedDisaster = await Prisma.disaster.delete({
+      where: {
+        id: disasterId,
+      },
+    });
+    return new ApiResponse(200, deletedDisaster, 'Disaster deleted');
   } catch (error) {
-    logger.error('Error deleting disaster:', error);
     res.status(500).json({
       success: false,
       error: 'Failed to delete disaster',

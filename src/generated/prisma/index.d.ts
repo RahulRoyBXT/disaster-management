@@ -1487,7 +1487,7 @@ export namespace Prisma {
     email: string
     role: $Enums.Role | null
     createdAt: Date
-    password: string | null
+    password: string
     _count: UserCountAggregateOutputType | null
     _min: UserMinAggregateOutputType | null
     _max: UserMaxAggregateOutputType | null
@@ -1567,7 +1567,7 @@ export namespace Prisma {
       email: string
       role: $Enums.Role | null
       createdAt: Date
-      password: string | null
+      password: string
     }, ExtArgs["result"]["user"]>
     composites: {}
   }
@@ -7089,7 +7089,7 @@ export namespace Prisma {
     email?: StringFilter<"User"> | string
     role?: EnumRoleNullableFilter<"User"> | $Enums.Role | null
     createdAt?: DateTimeFilter<"User"> | Date | string
-    password?: StringNullableFilter<"User"> | string | null
+    password?: StringFilter<"User"> | string
     disasters?: DisasterListRelationFilter
     reports?: ReportListRelationFilter
   }
@@ -7100,7 +7100,7 @@ export namespace Prisma {
     email?: SortOrder
     role?: SortOrderInput | SortOrder
     createdAt?: SortOrder
-    password?: SortOrderInput | SortOrder
+    password?: SortOrder
     disasters?: DisasterOrderByRelationAggregateInput
     reports?: ReportOrderByRelationAggregateInput
   }
@@ -7114,7 +7114,7 @@ export namespace Prisma {
     NOT?: UserWhereInput | UserWhereInput[]
     role?: EnumRoleNullableFilter<"User"> | $Enums.Role | null
     createdAt?: DateTimeFilter<"User"> | Date | string
-    password?: StringNullableFilter<"User"> | string | null
+    password?: StringFilter<"User"> | string
     disasters?: DisasterListRelationFilter
     reports?: ReportListRelationFilter
   }, "id" | "username" | "email">
@@ -7125,7 +7125,7 @@ export namespace Prisma {
     email?: SortOrder
     role?: SortOrderInput | SortOrder
     createdAt?: SortOrder
-    password?: SortOrderInput | SortOrder
+    password?: SortOrder
     _count?: UserCountOrderByAggregateInput
     _max?: UserMaxOrderByAggregateInput
     _min?: UserMinOrderByAggregateInput
@@ -7140,7 +7140,7 @@ export namespace Prisma {
     email?: StringWithAggregatesFilter<"User"> | string
     role?: EnumRoleNullableWithAggregatesFilter<"User"> | $Enums.Role | null
     createdAt?: DateTimeWithAggregatesFilter<"User"> | Date | string
-    password?: StringNullableWithAggregatesFilter<"User"> | string | null
+    password?: StringWithAggregatesFilter<"User"> | string
   }
 
   export type DisasterWhereInput = {
@@ -7419,7 +7419,7 @@ export namespace Prisma {
     email: string
     role?: $Enums.Role | null
     createdAt?: Date | string
-    password?: string | null
+    password: string
     disasters?: DisasterCreateNestedManyWithoutOwnerInput
     reports?: ReportCreateNestedManyWithoutUserInput
   }
@@ -7430,7 +7430,7 @@ export namespace Prisma {
     email: string
     role?: $Enums.Role | null
     createdAt?: Date | string
-    password?: string | null
+    password: string
     disasters?: DisasterUncheckedCreateNestedManyWithoutOwnerInput
     reports?: ReportUncheckedCreateNestedManyWithoutUserInput
   }
@@ -7441,7 +7441,7 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     role?: NullableEnumRoleFieldUpdateOperationsInput | $Enums.Role | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    password?: NullableStringFieldUpdateOperationsInput | string | null
+    password?: StringFieldUpdateOperationsInput | string
     disasters?: DisasterUpdateManyWithoutOwnerNestedInput
     reports?: ReportUpdateManyWithoutUserNestedInput
   }
@@ -7452,7 +7452,7 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     role?: NullableEnumRoleFieldUpdateOperationsInput | $Enums.Role | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    password?: NullableStringFieldUpdateOperationsInput | string | null
+    password?: StringFieldUpdateOperationsInput | string
     disasters?: DisasterUncheckedUpdateManyWithoutOwnerNestedInput
     reports?: ReportUncheckedUpdateManyWithoutUserNestedInput
   }
@@ -7463,7 +7463,7 @@ export namespace Prisma {
     email: string
     role?: $Enums.Role | null
     createdAt?: Date | string
-    password?: string | null
+    password: string
   }
 
   export type UserUpdateManyMutationInput = {
@@ -7472,7 +7472,7 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     role?: NullableEnumRoleFieldUpdateOperationsInput | $Enums.Role | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    password?: NullableStringFieldUpdateOperationsInput | string | null
+    password?: StringFieldUpdateOperationsInput | string
   }
 
   export type UserUncheckedUpdateManyInput = {
@@ -7481,7 +7481,7 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     role?: NullableEnumRoleFieldUpdateOperationsInput | $Enums.Role | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    password?: NullableStringFieldUpdateOperationsInput | string | null
+    password?: StringFieldUpdateOperationsInput | string
   }
 
   export type DisasterCreateInput = {
@@ -8770,7 +8770,7 @@ export namespace Prisma {
     email: string
     role?: $Enums.Role | null
     createdAt?: Date | string
-    password?: string | null
+    password: string
     reports?: ReportCreateNestedManyWithoutUserInput
   }
 
@@ -8780,7 +8780,7 @@ export namespace Prisma {
     email: string
     role?: $Enums.Role | null
     createdAt?: Date | string
-    password?: string | null
+    password: string
     reports?: ReportUncheckedCreateNestedManyWithoutUserInput
   }
 
@@ -8864,7 +8864,7 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     role?: NullableEnumRoleFieldUpdateOperationsInput | $Enums.Role | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    password?: NullableStringFieldUpdateOperationsInput | string | null
+    password?: StringFieldUpdateOperationsInput | string
     reports?: ReportUpdateManyWithoutUserNestedInput
   }
 
@@ -8874,7 +8874,7 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     role?: NullableEnumRoleFieldUpdateOperationsInput | $Enums.Role | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    password?: NullableStringFieldUpdateOperationsInput | string | null
+    password?: StringFieldUpdateOperationsInput | string
     reports?: ReportUncheckedUpdateManyWithoutUserNestedInput
   }
 
@@ -8963,7 +8963,7 @@ export namespace Prisma {
     email: string
     role?: $Enums.Role | null
     createdAt?: Date | string
-    password?: string | null
+    password: string
     disasters?: DisasterCreateNestedManyWithoutOwnerInput
   }
 
@@ -8973,7 +8973,7 @@ export namespace Prisma {
     email: string
     role?: $Enums.Role | null
     createdAt?: Date | string
-    password?: string | null
+    password: string
     disasters?: DisasterUncheckedCreateNestedManyWithoutOwnerInput
   }
 
@@ -9038,7 +9038,7 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     role?: NullableEnumRoleFieldUpdateOperationsInput | $Enums.Role | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    password?: NullableStringFieldUpdateOperationsInput | string | null
+    password?: StringFieldUpdateOperationsInput | string
     disasters?: DisasterUpdateManyWithoutOwnerNestedInput
   }
 
@@ -9048,7 +9048,7 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     role?: NullableEnumRoleFieldUpdateOperationsInput | $Enums.Role | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    password?: NullableStringFieldUpdateOperationsInput | string | null
+    password?: StringFieldUpdateOperationsInput | string
     disasters?: DisasterUncheckedUpdateManyWithoutOwnerNestedInput
   }
 
