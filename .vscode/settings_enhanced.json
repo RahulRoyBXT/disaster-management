@@ -1,0 +1,255 @@
+{
+  "cSpell.words": [
+    "plpgsql",
+    "postgis",
+    "supabase",
+    "jsonb",
+    "uuid",
+    "gist",
+    "dwithin",
+    "makepoint",
+    "setsrid",
+    "middleware",
+    "nodemon",
+    "geojson",
+    "coords",
+    "Rahul",
+    "Firestore",
+    "analytics"
+  ],
+
+  // Enhanced Editor Configuration
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit",
+    "source.organizeImports": "explicit"
+  },
+  "editor.formatOnPaste": true,
+  "editor.formatOnType": false,
+  "editor.tabSize": 2,
+  "editor.insertSpaces": true,
+  "editor.detectIndentation": true,
+  "editor.trimAutoWhitespace": true,
+  "editor.renderWhitespace": "boundary",
+  "editor.rulers": [],
+  "editor.wordWrap": "on",
+
+  // Enhanced Bracket Features (Key Features from your TS project)
+  "editor.bracketPairColorization.enabled": true,
+  "editor.guides.bracketPairs": "active",
+  "editor.guides.bracketPairsHorizontal": "active",
+  "editor.guides.highlightActiveIndentation": true,
+  "editor.guides.indentation": true,
+
+  // Enhanced Visual Features
+  "editor.minimap.enabled": true,
+  "editor.minimap.maxColumn": 120,
+  "editor.scrollBeyondLastLine": false,
+  "editor.smoothScrolling": true,
+  "editor.cursorBlinking": "smooth",
+  "editor.cursorSmoothCaretAnimation": "on",
+  "editor.fontLigatures": true,
+
+  // Enhanced IntelliSense and Suggestions (Return types, parameter hints)
+  "editor.suggest.insertMode": "replace",
+  "editor.acceptSuggestionOnCommitCharacter": false,
+  "editor.acceptSuggestionOnEnter": "on",
+  "editor.quickSuggestions": {
+    "other": "on",
+    "comments": "off",
+    "strings": "on"
+  },
+  "editor.parameterHints.enabled": true,
+  "editor.hover.enabled": true,
+  "editor.hover.delay": 300,
+  "editor.hover.sticky": true,
+  "editor.suggest.includeSnippets": true,
+  "editor.suggest.preview": true,
+  "editor.suggest.showKeywords": true,
+  "editor.suggest.localityBonus": true,
+
+  // Enhanced JavaScript Configuration (Better than TS for JS projects)
+  "javascript.preferences.importModuleSpecifier": "relative",
+  "javascript.suggest.autoImports": true,
+  "javascript.updateImportsOnFileMove.enabled": "always",
+  "javascript.preferences.includePackageJsonAutoImports": "auto",
+  "javascript.suggest.names": true,
+  "javascript.suggest.paths": true,
+  "javascript.suggest.completeJSDocs": true,
+  "javascript.preferences.quoteStyle": "single",
+  "javascript.format.semicolons": "insert",
+
+  // Enhanced File Associations
+  "files.associations": {
+    "*.js": "javascript",
+    "*.mjs": "javascript",
+    "*.cjs": "javascript",
+    "*.json": "jsonc",
+    "*.sql": "sql",
+    "*.md": "markdown",
+    "*.env*": "properties",
+    ".prettierrc": "json",
+    ".eslintrc": "jsonc"
+  },
+
+  // Enhanced File Management
+  "files.exclude": {
+    "**/.git": true,
+    "**/.svn": true,
+    "**/.hg": true,
+    "**/CVS": true,
+    "**/.DS_Store": true,
+    "**/Thumbs.db": true,
+    "**/node_modules": true,
+    "**/coverage": true,
+    "**/.env*": true,
+    "**/dist": true,
+    "**/build": true,
+    "**/.tmp": true,
+    "**/logs": true,
+    "**/*.log": true
+  },
+  "files.watcherExclude": {
+    "**/.git/objects/**": true,
+    "**/.git/subtree-cache/**": true,
+    "**/node_modules/*/**": true,
+    "**/dist/**": true,
+    "**/build/**": true,
+    "**/coverage/**": true
+  },
+
+  // Enhanced Search Configuration
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/bower_components": true,
+    "**/*.code-search": true,
+    "**/dist": true,
+    "**/build": true,
+    "**/coverage": true,
+    "**/.git": true,
+    "**/logs": true,
+    "**/*.log": true
+  },
+  "search.smartCase": true,
+  "search.useGlobalIgnoreFiles": true,
+
+  // Enhanced Emmet Configuration
+  "emmet.includeLanguages": {
+    "javascript": "javascriptreact"
+  },
+  "emmet.triggerExpansionOnTab": true,
+  "emmet.showSuggestionsAsSnippets": true,
+
+  // Enhanced ESLint Configuration
+  "eslint.validate": ["javascript", "javascriptreact"],
+  "eslint.workingDirectories": ["src"],
+  "eslint.codeAction.showDocumentation": {
+    "enable": true
+  },
+  "eslint.format.enable": true,
+  "eslint.codeActionsOnSave.mode": "problems",
+
+  // Language Specific Formatting
+  "[javascript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.codeActionsOnSave": {
+      "source.fixAll.eslint": "explicit"
+    }
+  },
+  "[javascriptreact]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[json]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[jsonc]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[html]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[css]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[scss]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[markdown]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[sql]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+
+  // Enhanced Git Configuration
+  "git.enableSmartCommit": true,
+  "git.confirmSync": false,
+  "git.autofetch": true,
+  "git.autoStash": true,
+  "git.followTagsWhenSync": true,
+  "git.pruneOnFetch": true,
+
+  // Enhanced Terminal Configuration
+  "terminal.integrated.defaultProfile.windows": "PowerShell",
+  "terminal.integrated.copyOnSelection": true,
+  "terminal.integrated.cursorBlinking": true,
+  "terminal.integrated.cursorStyle": "line",
+  "terminal.integrated.fontFamily": "Cascadia Code, Consolas, monospace",
+  "terminal.integrated.fontSize": 14,
+  "terminal.integrated.scrollback": 10000,
+
+  // Enhanced Explorer Configuration
+  "explorer.confirmDelete": false,
+  "explorer.confirmDragAndDrop": false,
+  "explorer.compactFolders": false,
+  "explorer.sortOrder": "type",
+  "explorer.decorations.colors": true,
+  "explorer.decorations.badges": true,
+
+  // Enhanced Workbench Configuration
+  "workbench.startupEditor": "welcomePage",
+  "workbench.editor.enablePreview": false,
+  "workbench.editor.closeOnFileDelete": true,
+  "workbench.tree.indent": 20,
+  "workbench.list.smoothScrolling": true,
+  "workbench.editor.highlightModifiedTabs": true,
+  "workbench.editor.labelFormat": "short",
+  "workbench.activityBar.visible": true,
+  "workbench.statusBar.visible": true,
+
+  // Enhanced Color Customizations (Beautiful bracket highlights)
+  "workbench.colorCustomizations": {
+    "activityBar.background": "#2f3542",
+    "activityBar.foreground": "#ffffff",
+    "statusBar.background": "#2f3542",
+    "statusBar.foreground": "#ffffff",
+    "editorBracketHighlight.foreground1": "#FFD700",
+    "editorBracketHighlight.foreground2": "#DA70D6",
+    "editorBracketHighlight.foreground3": "#87CEEB",
+    "editorBracketHighlight.foreground4": "#98FB98",
+    "editorBracketHighlight.foreground5": "#F0E68C",
+    "editorBracketHighlight.foreground6": "#FF6347"
+  },
+
+  // Enhanced Problems Configuration
+  "problems.decorations.enabled": true,
+  "problems.showCurrentInStatus": true,
+
+  // Enhanced Debugging Configuration
+  "debug.allowBreakpointsEverywhere": true,
+  "debug.console.fontSize": 14,
+  "debug.console.wordWrap": true,
+  "debug.internalConsoleOptions": "openOnSessionStart",
+
+  // Enhanced Extensions Configuration
+  "extensions.autoUpdate": "onlyEnabledExtensions",
+  "extensions.ignoreRecommendations": false,
+
+  // Security
+  "security.workspace.trust.untrustedFiles": "open",
+
+  // Performance Settings
+  "editor.semanticHighlighting.enabled": true,
+  "editor.bracketPairColorization.independentColorPoolPerBracketType": true
+}

@@ -1,0 +1,146 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "🚀 Launch Server",
+      "skipFiles": ["<node_internals>/**"],
+      "program": "${workspaceFolder}/src/server.js",
+      "env": {
+        "NODE_ENV": "development",
+        "DEBUG": "disaster-management:*"
+      },
+      "console": "integratedTerminal",
+      "restart": true,
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["--trace-warnings", "--experimental-modules"],
+      "outputCapture": "std"
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "🗄️ Setup Database",
+      "skipFiles": ["<node_internals>/**"],
+      "program": "${workspaceFolder}/src/scripts/setup-database.js",
+      "env": {
+        "NODE_ENV": "development"
+      },
+      "console": "integratedTerminal",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["--trace-warnings"]
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "🌱 Seed Database",
+      "skipFiles": ["<node_internals>/**"],
+      "program": "${workspaceFolder}/src/scripts/seed-database.js",
+      "env": {
+        "NODE_ENV": "development"
+      },
+      "console": "integratedTerminal",
+      "runtimeExecutable": "node"
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "🔄 Run Migrations",
+      "skipFiles": ["<node_internals>/**"],
+      "program": "${workspaceFolder}/src/scripts/migrate.js",
+      "args": ["run"],
+      "env": {
+        "NODE_ENV": "development"
+      },
+      "console": "integratedTerminal",
+      "runtimeExecutable": "node"
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "🧪 Run Tests",
+      "skipFiles": ["<node_internals>/**"],
+      "program": "${workspaceFolder}/node_modules/jest/bin/jest.js",
+      "args": ["--runInBand", "--detectOpenHandles"],
+      "env": {
+        "NODE_ENV": "test"
+      },
+      "console": "integratedTerminal",
+      "runtimeExecutable": "node"
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "🔄 Debug with Nodemon",
+      "skipFiles": ["<node_internals>/**"],
+      "program": "${workspaceFolder}/node_modules/nodemon/bin/nodemon.js",
+      "args": ["${workspaceFolder}/src/server.js"],
+      "env": {
+        "NODE_ENV": "development",
+        "DEBUG": "disaster-management:*"
+      },
+      "console": "integratedTerminal",
+      "restart": true,
+      "runtimeArgs": ["--inspect"]
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "🧪 Debug Single Test",
+      "skipFiles": ["<node_internals>/**"],
+      "program": "${workspaceFolder}/node_modules/jest/bin/jest.js",
+      "args": ["${fileBasenameNoExtension}", "--runInBand", "--no-cache", "--detectOpenHandles"],
+      "env": {
+        "NODE_ENV": "test"
+      },
+      "console": "integratedTerminal",
+      "runtimeExecutable": "node"
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "🔧 Debug Migration",
+      "skipFiles": ["<node_internals>/**"],
+      "program": "${workspaceFolder}/src/scripts/migrate.js",
+      "env": {
+        "NODE_ENV": "development"
+      },
+      "console": "integratedTerminal",
+      "runtimeExecutable": "node"
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "🌱 Debug Seed Script",
+      "skipFiles": ["<node_internals>/**"],
+      "program": "${workspaceFolder}/src/scripts/seed-database.js",
+      "env": {
+        "NODE_ENV": "development"
+      },
+      "console": "integratedTerminal",
+      "runtimeExecutable": "node"
+    },
+    {
+      "type": "node",
+      "request": "attach",
+      "name": "🔗 Attach to Server",
+      "port": 9229,
+      "restart": true,
+      "localRoot": "${workspaceFolder}",
+      "remoteRoot": "${workspaceFolder}",
+      "skipFiles": ["<node_internals>/**"]
+    }
+  ],
+  "compounds": [
+    {
+      "name": "🚀 Launch & Debug Server",
+      "configurations": ["🔄 Debug with Nodemon"],
+      "stopAll": true
+    },
+    {
+      "name": "🧪 Test & Debug Suite",
+      "configurations": ["🧪 Run Tests"],
+      "stopAll": true
+    }
+  ]
+}

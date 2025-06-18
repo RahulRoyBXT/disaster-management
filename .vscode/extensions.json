@@ -1,0 +1,76 @@
+{
+  "recommendations": [
+    "esbenp.prettier-vscode",
+    "dbaeumer.vscode-eslint",
+    "ms-vscode.vscode-json",
+    "redhat.vscode-yaml",
+    "christian-kohler.path-intellisense",
+    "humao.rest-client",
+    "github.copilot",
+    "github.copilot-chat",
+    "ms-vscode.powershell",
+
+    // === JAVASCRIPT & NODE.JS SPECIFIC ===
+    "ms-vscode.js-debug",
+    "ms-vscode.vscode-js-profile-table",
+    "christian-kohler.npm-intellisense",
+    "formulahendry.code-runner",
+    "ms-vscode.vscode-node-azure-pack",
+    "ms-vscode.vscode-typescript-next",
+
+    // === DATABASE & BACKEND DEVELOPMENT ===
+    "ckolkman.vscode-postgres",
+    "rangav.vscode-thunder-client",
+    "mongodb.mongodb-vscode",
+    "bradlc.vscode-tailwindcss",
+    "ms-vscode.vscode-sql-database",
+
+    // === ENHANCED DEVELOPMENT EXPERIENCE===
+    "streetsidesoftware.code-spell-checker",
+    "formulahendry.auto-rename-tag",
+    "formulahendry.auto-close-tag",
+    "usernamehw.errorlens",
+    "oderwat.indent-rainbow",
+    "ms-vscode.vscode-color-picker",
+    "formulahendry.auto-complete-tag",
+
+    // === GIT & VERSION CONTROL (Advanced) ===
+    "eamodio.gitlens",
+    "github.vscode-pull-request-github",
+    "mhutchie.git-graph",
+    "donjayamanne.githistory",
+
+    // === API DEVELOPMENT & TESTING ===
+    "42crunch.vscode-openapi",
+    "rangav.vscode-thunder-client",
+    "ms-vscode.vscode-http-client",
+    "postman.postman-for-vscode",
+
+    // === PRODUCTIVITY & UTILITIES ===
+    "ms-vscode.vscode-todo-highlight",
+    "gruntfuggly.todo-tree",
+    "alefragnani.bookmarks",
+    "ms-vscode.vscode-regex",
+    "wmaurer.change-case",
+
+    // === CODE QUALITY & ANALYSIS ===
+    "sonarsource.sonarlint-vscode",
+    "ms-vscode.vscode-eslint-disable",
+    "bradlc.vscode-tailwindcss-classnames",
+
+    // === DOCUMENTATION & MARKDOWN ===
+    "yzhang.markdown-all-in-one",
+    "davidanson.vscode-markdownlint",
+    "ms-vscode.vscode-markdown-preview-github-styles",
+
+    // === THEMES & ICONS (Enhanced Visual Experience) ===
+    "pkief.material-icon-theme",
+    "github.github-vscode-theme"
+  ],
+  "unwantedRecommendations": [
+    "ms-vscode.vscode-typescript",
+    "hookyqr.beautify",
+    "bradlc.vscode-tailwindcss",
+    "vetur.vetur"
+  ]
+}
