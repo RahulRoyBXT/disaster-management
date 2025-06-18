@@ -1,38 +1,35 @@
-import { asyncHandler } from '../utils/asyncHandler';
+import bcrypt from 'bcryptjs';
+import { PrismaClient } from '../generated/prisma/index.js';
+import { ApiError } from '../utils/apiError.js';
+import { asyncHandler } from '../utils/asyncHandler.js';
+import { generateToken } from '../utils/generateToken.js';
+const prisma = new PrismaClient();
 
+// validation required
 export const registerController = asyncHandler(async (req, res) => {
-  const { email, fullName, username, password } = req.body;
-
-  // Taking response from ZOD
-  const paths = Object.values(req.files)
-    .flat()
-    .map(file => file.path);
-  const avatarLocalPath = paths?.[0];
-  const coveImageLocalPath = paths?.[1];
-
-  const existedUser = await User.findOne({
-    $or: [{ email }, { username }],
-  });
-
-  if (existedUser) {
-    DeleteLocalFile(avatarLocalPath, coveImageLocalPath);
-    throw new ApiError(409, 'User with email or username is already exists');
+  const { email, username, password } = req.body;
+  console.log(email, password, username);
+  console.log(process.env.DATABASE_URL);
+  if ((!email && !username) || !password) {
+    throw new ApiError(400, 'All fields are required');
   }
+  // const existedUser = await prisma.user.findUnique({
+  //   where: {
+  //     email,
+  //   },
+  // });
 
-  const avatar = await cloudinaryUploader(avatarLocalPath);
-  console.log(avatar);
-  const coverImage = await cloudinaryUploader(coveImageLocalPath);
-
-  const user = await User.create({
-    fullName,
-    avatar: avatar.url,
-    coverImage: coverImage?.url || '',
-    email,
-    password,
-    username,
+  // if (existedUser) {
+  //   throw new ApiError(409, 'User with email or username is already exists');
+  // }
+  const hashedPassword = await bcrypt.hash(password, 10);
+  const createdUser = await prisma.user.create({
+    data: {
+      email,
+      password: hashedPassword,
+      username,
+    },
   });
-
-  const createdUser = await User.findById(user._id).select('-password -refreshToken');
 
   if (!createdUser) {
     throw new ApiError(500, 'Something Went wrong while creating user');
@@ -41,40 +38,42 @@ export const registerController = asyncHandler(async (req, res) => {
   return res.status(201).json(new ApiResponse(200, createdUser, 'Users created successfully'));
 });
 
-
-
 export const loginUser = asyncHandler(async (req, res) => {
-  const { email, username, password } = req.body;
+  const { username, password } = req.body;
 
-  // DB query works on either email or username
-  const queryConditionArr = [];
-
-  if (email && email.trim() !== '') {
-    queryConditionArr.push({ email });
-  }
-  if (username && username.trim() !== '') {
-    queryConditionArr.push({ username });
+  if (!username || !password) {
+    throw new ApiError(400, 'Username and password are required');
   }
 
-  if (queryConditionArr.length === 0) {
-    throw new ApiError(400, 'username or email is required');
-  }
-  const user = await User.findOne({
-    $or: queryConditionArr,
+  // Get user with password field included
+  const user = await prisma.user.findUnique({
+    where: {
+      username,
+    },
+    select: {
+      id: true,
+      email: true,
+      username: true,
+      password: true,
+      role: true,
+      createdAt: true,
+    },
   });
 
   if (!user) {
-    throw new ApiError(404, 'User Does not exits');
+    throw new ApiError(404, 'User does not exist');
   }
 
-  const isPasswordValid = await user.isPasswordCorrect(password);
+  const isPasswordValid = await bcrypt.compare(password, user.password);
+
   if (!isPasswordValid) {
-    throw new ApiError(401, 'Invalid Credentials');
+    throw new ApiError(401, 'Invalid credentials');
   }
 
-  const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(user._id);
+  const Token = generateToken(username);
 
-  const loggedInUser = await User.findById(user._id).select('-password -refreshToken');
+  // Remove password from user object
+  const { password: _, ...loggedInUser } = user;
 
   const options = {
     httpOnly: true,
@@ -83,39 +82,17 @@ export const loginUser = asyncHandler(async (req, res) => {
 
   return res
     .status(200)
-    .cookie('accessToken', accessToken, options)
-    .cookie('refreshToken', refreshToken, options)
-    .json(
-      new ApiResponse(
-        200,
-        { user: loggedInUser, accessToken, refreshToken },
-        'User Logged In successfully'
-      )
-    );
+    .cookie('Token', Token, options)
+    .json(new ApiResponse(200, { user: loggedInUser, Token }, 'User logged in successfully'));
 });
 
-
-
 export const logOut = asyncHandler(async (req, res) => {
-  const userId = req.user._id;
-  await User.findByIdAndUpdate(
-    userId,
-    {
-      $set: {
-        refreshToken: undefined,
-      },
-    },
-    {
-      new: true,
-    }
-  );
   const options = {
     httpOnly: true,
     secure: true,
   };
   return res
     .status(200)
-    .clearCookie('accessToken', options)
-    .clearCookie('refreshToken', options)
+    .clearCookie('token', options)
     .json(new ApiResponse(200, {}, 'user Logged out successfully'));
 });

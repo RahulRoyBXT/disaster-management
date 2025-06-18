@@ -1,8 +1,6 @@
 import compression from 'compression';
-import cors from 'cors';
 import express from 'express';
-
-import userRoute from './routes/users.route';
+import userRoute from './routes/users.route.js';
 
 const app = express();
 
@@ -43,13 +41,13 @@ const app = express();
 // );
 
 // CORS configuration
-app.use(
-  cors({
-    origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
-    credentials: true,
-    optionsSuccessStatus: 200,
-  })
-);
+// app.use(
+//   cors({
+//     origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
+//     credentials: true,
+//     optionsSuccessStatus: 200,
+//   })
+// );
 
 // Rate limiting
 // const limiter = rateLimit({
@@ -93,7 +91,7 @@ app.use(compression());
 // user route
 app.use('/api/v1/users', userRoute);
 // Disaster route
-app.use('/api/v1/disasters', () => {});
+// app.use('/api/v1/disasters', () => {});
 
 // Root endpoint
 app.get('/', (req, res) => {
