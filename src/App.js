@@ -1,7 +1,8 @@
 import compression from 'compression';
+import cookieParser from 'cookie-parser';
 import express from 'express';
+import disasterRoutes from './routes/disasters.routes.js';
 import userRoute from './routes/users.route.js';
-
 const app = express();
 
 // Will add it later
@@ -63,6 +64,7 @@ const app = express();
 // app.use(limiter);
 
 // Body parsing middleware
+app.use(cookieParser());
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
@@ -90,8 +92,9 @@ app.use(compression());
 // Routes
 // user route
 app.use('/api/v1/users', userRoute);
+
 // Disaster route
-// app.use('/api/v1/disasters', () => {});
+app.use('/api/v1/disasters', disasterRoutes);
 
 // Root endpoint
 app.get('/', (req, res) => {

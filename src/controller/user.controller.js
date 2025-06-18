@@ -1,6 +1,7 @@
 import bcrypt from 'bcryptjs';
 import { PrismaClient } from '../generated/prisma/index.js';
 import { ApiError } from '../utils/apiError.js';
+import { ApiResponse } from '../utils/ApiResponse.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import { generateToken } from '../utils/generateToken.js';
 const prisma = new PrismaClient();
@@ -13,15 +14,15 @@ export const registerController = asyncHandler(async (req, res) => {
   if ((!email && !username) || !password) {
     throw new ApiError(400, 'All fields are required');
   }
-  // const existedUser = await prisma.user.findUnique({
-  //   where: {
-  //     email,
-  //   },
-  // });
+  const existedUser = await prisma.user.findFirst({
+    where: {
+      OR: [{ email }, { username }],
+    },
+  });
 
-  // if (existedUser) {
-  //   throw new ApiError(409, 'User with email or username is already exists');
-  // }
+  if (existedUser) {
+    throw new ApiError(409, 'User with email or username is already exists');
+  }
   const hashedPassword = await bcrypt.hash(password, 10);
   const createdUser = await prisma.user.create({
     data: {
