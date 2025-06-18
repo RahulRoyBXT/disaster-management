@@ -7,8 +7,8 @@ import {
   getAllDisasters,
   getDisasterById,
   updateDisaster,
-} from '../controller/disaster.controller';
-import verifyJWT from '../middleware/verifyToken.middleware.js';
+} from '../controller/disaster.controller.js';
+import { verifyJWT } from '../middleware/verifyToken.middleware.js';
 const router = express();
 
 // Store multer image in memory

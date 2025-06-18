@@ -42,7 +42,7 @@ model Disaster {
   ownerId       String
   owner         User       @relation("UserDisasters", fields: [ownerId], references: [id])
   createdAt     DateTime   @default(now())
-  auditTrail    Json       @default("{}")
+  auditTrail    Json?       @default("{}")
   reports       Report[]
   resources     Resource[]
 }
