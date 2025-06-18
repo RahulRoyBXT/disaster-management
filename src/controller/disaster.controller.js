@@ -1,16 +1,3 @@
-<<<<<<< HEAD
-import { Prisma } from '@prisma/client';
-import { ApiError } from '../utils/apiError.js';
-import { asyncHandler } from '../utils/asyncHandler.js';
-
-export const getAllDisasters = asyncHandler(async (req, res) => {
-  try {
-    const disaster = Prisma.disaster.findMany();
-    if (!disaster) {
-      throw new ApiError(400, 'No Disaster Found');
-    }
-    return new ApiResponse(200, disaster, 'Disaster fetched');
-=======
 import { PrismaClient } from '../generated/prisma/index.js';
 import { ApiError } from '../utils/apiError.js';
 import { ApiResponse } from '../utils/ApiResponse.js';
@@ -27,7 +14,6 @@ export const getAllDisasters = asyncHandler(async (req, res) => {
     }
     console.log('all disaster', disaster);
     res.status(200).json(new ApiResponse(200, disaster, 'Disaster fetched'));
->>>>>>> b4eea64afcef86c76dc5f1de8f73c96d3894e23d
   } catch (error) {
     res.status(500).json({
       success: false,
@@ -50,11 +36,7 @@ export const getDisasterById = asyncHandler(async (req, res) => {
     if (!disaster) {
       throw new ApiError(404, 'No Disaster Found');
     }
-<<<<<<< HEAD
-    return new ApiResponse(200, disaster, 'Disaster Found successfully');
-=======
     res.status(200).json(new ApiResponse(200, disaster, 'Disaster Found successfully'));
->>>>>>> b4eea64afcef86c76dc5f1de8f73c96d3894e23d
   } catch (error) {
     res.status(500).json({
       success: false,
@@ -67,21 +49,8 @@ export const getDisasterById = asyncHandler(async (req, res) => {
 export const createDisaster = asyncHandler(async (req, res) => {
   try {
     const { title, locationName, latitude, longitude, description, tags, auditTrail } = req.body;
-<<<<<<< HEAD
-
-    if (
-      !title ||
-      !locationName ||
-      !latitude ||
-      !longitude ||
-      !description ||
-      !tags ||
-      !auditTrail
-    ) {
-=======
     console.log(req.user.id);
     if (!title || !locationName || !latitude || !longitude || !description || !tags) {
->>>>>>> b4eea64afcef86c76dc5f1de8f73c96d3894e23d
       throw new ApiError(400, 'All fields are required');
     }
     const disaster = await Prisma.disaster.create({
@@ -89,18 +58,10 @@ export const createDisaster = asyncHandler(async (req, res) => {
         title,
         ownerId: req.user.id,
         locationName,
-<<<<<<< HEAD
-        latitude,
-        longitude,
-        description,
-        tags,
-        auditTrail,
-=======
         latitude: parseFloat(latitude),
         longitude: parseFloat(longitude),
         description,
         tags,
->>>>>>> b4eea64afcef86c76dc5f1de8f73c96d3894e23d
       },
     });
     return res.status(201).json(new ApiResponse(201, disaster, 'Disaster Created successfully'));
@@ -119,13 +80,8 @@ export const createDisaster = asyncHandler(async (req, res) => {
 export const updateDisaster = asyncHandler(async (req, res) => {
   try {
     const disasterId = req.params.id;
-<<<<<<< HEAD
-    const { key, value } = req.body;
-    if (!key || !value) {
-=======
     const { description } = req.body;
     if (!description) {
->>>>>>> b4eea64afcef86c76dc5f1de8f73c96d3894e23d
       throw new ApiError(400, 'Nothing To Update');
     }
     if (!disasterId) {
@@ -141,16 +97,6 @@ export const updateDisaster = asyncHandler(async (req, res) => {
     }
     const updatedDisaster = await Prisma.disaster.update({
       where: {
-<<<<<<< HEAD
-        disasterId,
-      },
-      data: {
-        key: value,
-      },
-    });
-    return new ApiResponse(200, updateDisaster, 'Disaster Updated');
-  } catch (error) {
-=======
         id: disasterId,
       },
       data: {
@@ -160,7 +106,6 @@ export const updateDisaster = asyncHandler(async (req, res) => {
     res.status(200).json(new ApiResponse(200, updateDisaster, 'Disaster Updated'));
   } catch (error) {
     throw new ApiError(500, error.message);
->>>>>>> b4eea64afcef86c76dc5f1de8f73c96d3894e23d
     res.status(500).json({
       success: false,
       error: 'Failed to update disaster',
@@ -189,15 +134,45 @@ export const deleteDisaster = asyncHandler(async (req, res) => {
         id: disasterId,
       },
     });
-<<<<<<< HEAD
-    return new ApiResponse(200, deletedDisaster, 'Disaster deleted');
-=======
     res.status(204).json(new ApiResponse(204, deletedDisaster, 'Disaster deleted'));
->>>>>>> b4eea64afcef86c76dc5f1de8f73c96d3894e23d
   } catch (error) {
     res.status(500).json({
       success: false,
       error: 'Failed to delete disaster',
+    });
+  }
+});
+
+export const socialMedia = asyncHandler(async (req, res) => {
+  return res
+    .status(200)
+    .json(new ApiResponse(200, { post: '#floodrelief Need food in NYC', user: 'citizen1' }));
+});
+
+export const getAllReports = asyncHandler(async (req, res) => {
+  try {
+    const disasterId = req.params.id;
+    if (!disasterId) {
+      throw new ApiError(400, 'Disaster id is required');
+    }
+    const reports = await Prisma.report.findMany({
+      where: {
+        disasterId: disasterId,
+      },
+      include: {
+        user: true, // Include user details if needed
+      },
+    });
+
+    if (!reports || reports.length === 0) {
+      throw new ApiError(404, 'No reports found for this disaster');
+    }
+
+    res.status(200).json(new ApiResponse(200, reports, 'Reports fetched successfully'));
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message || 'Failed to fetch reports',
     });
   }
 });
