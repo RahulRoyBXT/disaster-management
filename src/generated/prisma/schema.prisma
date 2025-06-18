@@ -1,0 +1,84 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  username  String   @unique
+  email     String   @unique
+  role      Role     @default(CONTRIBUTOR)
+  createdAt DateTime @default(now())
+
+  // Relations
+  disasters Disaster[] @relation("UserDisasters")
+  reports   Report[]
+}
+
+enum Role {
+  ADMIN
+  CONTRIBUTOR
+}
+
+model Disaster {
+  id           String     @id @default(cuid())
+  title        String
+  locationName String
+  latitude     Float
+  longitude    Float
+  description  String
+  tags         String[] // Postgres supports array of TEXT
+  ownerId      String
+  owner        User       @relation("UserDisasters", fields: [ownerId], references: [id])
+  createdAt    DateTime   @default(now())
+  auditTrail   Json       @default("{}")
+  reports      Report[]
+  resources    Resource[]
+}
+
+model Report {
+  id                 String             @id @default(cuid())
+  disasterId         String
+  disaster           Disaster           @relation(fields: [disasterId], references: [id])
+  userId             String
+  user               User               @relation(fields: [userId], references: [id])
+  content            String
+  imageUrl           String
+  verificationStatus VerificationStatus @default(PENDING)
+  createdAt          DateTime           @default(now())
+}
+
+enum VerificationStatus {
+  PENDING
+  VERIFIED
+  REJECTED
+}
+
+model Resource {
+  id           String   @id @default(cuid())
+  disasterId   String
+  disaster     Disaster @relation(fields: [disasterId], references: [id])
+  name         String
+  locationName String
+  latitude     Float
+  longitude    Float
+  type         String // e.g. shelter, hospital
+  createdAt    DateTime @default(now())
+}
+
+model Cache {
+  key       String   @id
+  value     Json
+  expiresAt DateTime
+}
