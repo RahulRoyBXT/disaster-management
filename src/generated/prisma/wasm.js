@@ -125,7 +125,8 @@ exports.Prisma.UserScalarFieldEnum = {
   username: 'username',
   email: 'email',
   role: 'role',
-  createdAt: 'createdAt'
+  createdAt: 'createdAt',
+  password: 'password'
 };
 
 exports.Prisma.DisasterScalarFieldEnum = {
@@ -180,6 +181,11 @@ exports.Prisma.JsonNullValueInput = {
 exports.Prisma.QueryMode = {
   default: 'default',
   insensitive: 'insensitive'
+};
+
+exports.Prisma.NullsOrder = {
+  first: 'first',
+  last: 'last'
 };
 
 exports.Prisma.JsonNullValueFilter = {

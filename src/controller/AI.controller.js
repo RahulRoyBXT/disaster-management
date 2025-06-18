@@ -1,14 +1,28 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import dotenv from 'dotenv';
+import { ApiError } from '../utils/apiError.js';
 import { ApiResponse } from '../utils/ApiResponse.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 
-const genAI = new GoogleGenerativeAI(process.env.GoogleGenerativeAI);
+dotenv.config();
+
+let genAI;
 
 export const verifyImage = asyncHandler(async (req, res) => {
-  const { imageBase64 } = req.body;
+  const file = req.file;
+  if (!file) {
+    return res.status(400).json({ error: 'Image file is not found!' });
+  }
 
-  if (!imageBase64) {
-    return res.status(400).json({ error: 'Image data is required!' });
+  const base64Image = file.buffer.toString('base64');
+
+  if (!process.env.GEMINI_API_KEY) {
+    return res.status(500).json({ error: 'Gemini API key not configured' });
+  }
+
+  // Loading the Env
+  if (!genAI) {
+    genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
   }
 
   const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
@@ -18,13 +32,53 @@ export const verifyImage = asyncHandler(async (req, res) => {
     {
       inlineData: {
         mimeType: 'image/jpeg', // or "image/png"
-        data: imageBase64,
+        data: base64Image,
       },
     },
   ]);
 
+  console.log('result:', result);
+
   const response = await result.response;
+
+  if (!response) {
+    throw new ApiError(500, 'Failed to process the Image with AI');
+  }
   const text = response.text();
 
   res.status(200).json(new ApiResponse(200, text));
+});
+
+export const Geolocation = asyncHandler(async (req, res) => {
+  const { description } = req.body;
+
+  if (!description) {
+    return res.status(400).json({ error: 'description is a required field!' });
+  }
+
+  if (!genAI) {
+    genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+  }
+
+  const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+
+  const result = await model.generateContent(`
+      Extract location from this sentence: ${description}
+    `);
+  const response = await result.response;
+  const text = response.text();
+  const locationName = text.trim();
+
+  const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(
+    locationName
+  )}&format=json&limit=1`;
+  const res2 = await fetch(url, {
+    headers: { 'User-Agent': 'DisasterApp/1.0' },
+  });
+
+  const data = await res2.json();
+  if (!data.length) throw new Error('Location not found');
+
+  const { lat, lon } = data[0];
+  res.json({ data: { lat: parseFloat(lat), lng: parseFloat(lon) } });
 });
