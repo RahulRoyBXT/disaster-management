@@ -21,7 +21,6 @@ model User {
   role      Role      @default(CONTRIBUTOR)
   createdAt DateTime  @default(now())
   password  String    
-
   // Relations
   disasters Disaster[] @relation("UserDisasters")
   reports   Report[]
