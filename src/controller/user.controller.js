@@ -1,27 +1,23 @@
+import { PrismaClient } from '../database/';
+import { ApiError } from '../utils/apiError';
 import { asyncHandler } from '../utils/asyncHandler';
+const prisma = new PrismaClient();
 
 export const registerController = asyncHandler(async (req, res) => {
-  const { email, fullName, username, password } = req.body;
+  const { email, username, password } = req.body;
 
-  // Taking response from ZOD
-  const paths = Object.values(req.files)
-    .flat()
-    .map(file => file.path);
-  const avatarLocalPath = paths?.[0];
-  const coveImageLocalPath = paths?.[1];
-
-  const existedUser = await User.findOne({
-    $or: [{ email }, { username }],
+  if ((!email && !username) || !password) {
+    throw new ApiError(400, 'All fields are required');
+  }
+  const user = await prisma.User.findUnique({
+    where: {
+      email,
+    },
   });
 
   if (existedUser) {
-    DeleteLocalFile(avatarLocalPath, coveImageLocalPath);
     throw new ApiError(409, 'User with email or username is already exists');
   }
-
-  const avatar = await cloudinaryUploader(avatarLocalPath);
-  console.log(avatar);
-  const coverImage = await cloudinaryUploader(coveImageLocalPath);
 
   const user = await User.create({
     fullName,
@@ -40,8 +36,6 @@ export const registerController = asyncHandler(async (req, res) => {
 
   return res.status(201).json(new ApiResponse(200, createdUser, 'Users created successfully'));
 });
-
-
 
 export const loginUser = asyncHandler(async (req, res) => {
   const { email, username, password } = req.body;
@@ -93,8 +87,6 @@ export const loginUser = asyncHandler(async (req, res) => {
       )
     );
 });
-
-
 
 export const logOut = asyncHandler(async (req, res) => {
   const userId = req.user._id;
