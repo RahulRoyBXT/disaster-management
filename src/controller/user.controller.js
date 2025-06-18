@@ -1,4 +1,4 @@
-import { asyncHandler } from '../utils/asyncHandler';
+import { asyncHandler } from '../utils/asyncHandler.js';
 
 export const registerController = asyncHandler(async (req, res) => {
   const { email, fullName, username, password } = req.body;
@@ -40,8 +40,6 @@ export const registerController = asyncHandler(async (req, res) => {
 
   return res.status(201).json(new ApiResponse(200, createdUser, 'Users created successfully'));
 });
-
-
 
 export const loginUser = asyncHandler(async (req, res) => {
   const { email, username, password } = req.body;
@@ -93,8 +91,6 @@ export const loginUser = asyncHandler(async (req, res) => {
       )
     );
 });
-
-
 
 export const logOut = asyncHandler(async (req, res) => {
   const userId = req.user._id;

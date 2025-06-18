@@ -2,8 +2,8 @@ import compression from 'compression';
 import cors from 'cors';
 import express from 'express';
 
-import userRoute from './routes/users.route';
-
+import disasterRoutes from './routes/disasters.routes.js';
+import userRoute from './routes/users.route.js';
 const app = express();
 
 // Will add it later
@@ -92,8 +92,9 @@ app.use(compression());
 // Routes
 // user route
 app.use('/api/v1/users', userRoute);
+
 // Disaster route
-app.use('/api/v1/disasters', () => {});
+app.use('/api/v1/disasters', disasterRoutes);
 
 // Root endpoint
 app.get('/', (req, res) => {

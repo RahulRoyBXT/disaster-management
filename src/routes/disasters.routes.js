@@ -1,15 +1,12 @@
 import express from 'express';
-import {
-  createDisaster,
-  deleteDisaster,
-  getAllDisasters,
-  getDisasterById,
-  updateDisaster,
-} from '../controller/disaster.controller';
+import { verifyImage } from '../controller/AI.controller.js';
 const router = express();
 
-router.route('/').get(getAllDisasters);
+// router.route('/').get(getAllDisasters);
 
-router.route('/:id').get(getDisasterById).put(updateDisaster).delete(deleteDisaster);
+// router.route('/:id').get(getDisasterById).put(updateDisaster).delete(deleteDisaster);
+router.route('/:id/verify-image').post(verifyImage);
 
-router.route('/create').post(createDisaster);
+// router.route('/create').post(createDisaster);
+
+export default router;
