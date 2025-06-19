@@ -97,3 +97,24 @@ export const logOut = asyncHandler(async (req, res) => {
     .clearCookie('token', options)
     .json(new ApiResponse(200, {}, 'user Logged out successfully'));
 });
+
+export const getUserProfile = asyncHandler(async (req, res) => {
+  const userId = req.user.id;
+
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: {
+      id: true,
+      email: true,
+      username: true,
+      role: true,
+      createdAt: true,
+    },
+  });
+
+  if (!user) {
+    throw new ApiError(404, 'User not found');
+  }
+
+  return res.status(200).json(new ApiResponse(200, user, 'User profile retrieved successfully'));
+});

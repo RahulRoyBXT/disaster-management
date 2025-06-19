@@ -2,6 +2,7 @@ import compression from 'compression';
 import cookieParser from 'cookie-parser';
 import express from 'express';
 import disasterRoutes from './routes/disasters.routes.js';
+import reportRoutes from './routes/report.routes.js';
 import resourceRoute from './routes/resources.routes.js';
 import userRoute from './routes/users.route.js';
 const app = express();
@@ -98,7 +99,9 @@ app.use('/api/v1/users', userRoute);
 app.use('/api/v1/disasters', disasterRoutes);
 
 // Resources route
-app.use('/resources', resourceRoute);
+app.use('/api/v1/resources', resourceRoute);
+
+app.use('/api/v1/reports', reportRoutes);
 
 // Root endpoint
 app.get('/', (req, res) => {

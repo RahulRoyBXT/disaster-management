@@ -9,7 +9,7 @@ import { verifyJWT } from '../middleware/auth.middleware.js';
 const router = express.Router();
 
 router.route('/create').post(verifyJWT, createResource);
-router.route('/update').post(verifyJWT, updateResource);
+router.route('/update/:id').post(verifyJWT, updateResource);
 router.route('/delete/:id').post(verifyJWT, deleteResource);
 router.route('/:id').post(verifyJWT, getResourceById);
 
