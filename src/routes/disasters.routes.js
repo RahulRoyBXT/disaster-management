@@ -5,10 +5,13 @@ import {
   createDisaster,
   deleteDisaster,
   getAllDisasters,
+  getAllReports,
   getDisasterById,
+  socialMedia,
   updateDisaster,
 } from '../controller/disaster.controller.js';
 import { verifyJWT } from '../middleware/verifyToken.middleware.js';
+
 const router = express();
 
 // Store multer image in memory
@@ -33,5 +36,10 @@ router.route('/:id/verify-image').post(upload.single('image'), verifyImage);
 // Extract location from description
 router.route('/geocode').post(upload.none(), Geolocation);
 
-export default router;
 router.route('/create').post(verifyJWT, createDisaster);
+
+router.route('/social-media').get(verifyJWT, socialMedia);
+// all all reports for a disaster
+router.route('/:id/reports').get(verifyJWT, getAllReports);
+
+export default router;

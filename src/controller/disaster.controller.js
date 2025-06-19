@@ -143,6 +143,40 @@ export const deleteDisaster = asyncHandler(async (req, res) => {
   }
 });
 
+export const socialMedia = asyncHandler(async (req, res) => {
+  return res
+    .status(200)
+    .json(new ApiResponse(200, { post: '#floodrelief Need food in NYC', user: 'citizen1' }));
+});
+
+export const getAllReports = asyncHandler(async (req, res) => {
+  try {
+    const disasterId = req.params.id;
+    if (!disasterId) {
+      throw new ApiError(400, 'Disaster id is required');
+    }
+    const reports = await Prisma.report.findMany({
+      where: {
+        disasterId: disasterId,
+      },
+      include: {
+        user: true, // Include user details if needed
+      },
+    });
+
+    if (!reports || reports.length === 0) {
+      throw new ApiError(404, 'No reports found for this disaster');
+    }
+
+    res.status(200).json(new ApiResponse(200, reports, 'Reports fetched successfully'));
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message || 'Failed to fetch reports',
+    });
+  }
+});
+
 /**
  * GET /api/disasters/:id/reports
  * Get all reports for a specific disaster
