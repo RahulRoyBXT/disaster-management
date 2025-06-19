@@ -5,6 +5,8 @@ import { asyncHandler } from '../utils/asyncHandler.js';
 
 const Prisma = new PrismaClient();
 
+// TODO: check all controller
+
 export const createReport = asyncHandler(async (req, res) => {
   const { disasterId, content } = req.body;
   const file = req.file;

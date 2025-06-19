@@ -9,14 +9,12 @@ import { verifyJWT } from '../middleware/auth.middleware.js';
 
 const router = express.Router();
 
-// create a report
-router.route('/create').post(verifyJWT, createReport);
-// get a report, update an existing report, or delete a report
-router
-  .route('/:id')
-  .get(verifyJWT, getReport)
-  .put(verifyJWT, updateReport)
-  .delete(verifyJWT, deleteReport);
+router.use(verifyJWT);
 
-// Export the router
+router.route('/').post(createReport);
+
+// get a report, update an existing report, or delete a report
+router.route('/:id').get(getReport).put(updateReport).delete(deleteReport);
+
 export default router;
+
