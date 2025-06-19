@@ -84,8 +84,17 @@ model Resource {
 }
 
 model Cache {
-  key        String   @id
-  value      Json
-  expiresAt  DateTime
+  key           String   @id
+  value         Json
+  expires_at    DateTime @map("expiresAt")
+  created_at    DateTime @default(now()) @map("createdAt")
+  updated_at    DateTime @updatedAt @map("updatedAt")
+  access_count  Int      @default(1) @map("accessCount")
+  last_accessed DateTime? @map("lastAccessed")
+  tags          String[] @default([])
+
+  @@index([expires_at])
+  @@index([tags])
+  @@map("cache")
 }
 

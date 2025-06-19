@@ -2,8 +2,16 @@ import { PrismaClient } from '../generated/prisma/index.js';
 import { ApiError } from '../utils/apiError.js';
 import { ApiResponse } from '../utils/ApiResponse.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
+import { locationToGeoCode } from '../utils/LocationToGeoCode.js';
+import { logger } from '../utils/logger.js';
+import { rawLocationToLocationData } from '../utils/RawLocationToLocaionData.js';
 
 const Prisma = new PrismaClient();
+
+// Helper to get socket.io instance
+const getSocket = req => {
+  return req.app.get('io');
+};
 
 export const getAllDisasters = asyncHandler(async (req, res) => {
   try {
@@ -48,22 +56,48 @@ export const getDisasterById = asyncHandler(async (req, res) => {
 // Create Disaster
 export const createDisaster = asyncHandler(async (req, res) => {
   try {
-    const { title, locationName, latitude, longitude, description, tags, auditTrail } = req.body;
+    const { title, locationName, description, tags } = req.body;
     console.log(req.user.id);
-    if (!title || !locationName || !latitude || !longitude || !description || !tags) {
+    if (!title || !locationName || !description || !tags) {
       throw new ApiError(400, 'All fields are required');
     }
+
+    const FilteredLocationName = await rawLocationToLocationData({
+      locationName: locationName.toString(),
+      description: description.toString(),
+    });
+
+    if (!FilteredLocationName) {
+      throw new ApiError(400, 'Invalid location name provided');
+    }
+
+    const { lat, lng } = await locationToGeoCode(FilteredLocationName);
+
     const disaster = await Prisma.disaster.create({
       data: {
         title,
-        ownerId: req.user.id,
-        locationName,
-        latitude: parseFloat(latitude),
-        longitude: parseFloat(longitude),
+        owner: {
+          connect: { id: req.user.id },
+        },
+        locationName: FilteredLocationName,
+        latitude: parseFloat(lat),
+        longitude: parseFloat(lng),
         description,
         tags,
       },
     });
+
+    // Emit disaster_created event using socket.io
+    const io = getSocket(req);
+    if (io) {
+      io.emit('disaster_created', {
+        event: 'disaster_created',
+        data: disaster,
+        message: `New disaster reported: ${disaster.title}`,
+        timestamp: new Date().toISOString(),
+      });
+    }
+
     return res.status(201).json(new ApiResponse(201, disaster, 'Disaster Created successfully'));
   } catch (error) {
     res.status(500).json({
@@ -103,13 +137,21 @@ export const updateDisaster = asyncHandler(async (req, res) => {
         description,
       },
     });
-    res.status(200).json(new ApiResponse(200, updateDisaster, 'Disaster Updated'));
+
+    // Emit disaster_updated
+    const io = getSocket(req);
+    if (io) {
+      io.emit('disaster_updated', {
+        event: 'disaster_updated',
+        data: updatedDisaster,
+        message: `Disaster updated: ${updatedDisaster.title}`,
+        timestamp: new Date().toISOString(),
+      });
+    }
+
+    res.status(200).json(new ApiResponse(200, updatedDisaster, 'Disaster Updated'));
   } catch (error) {
     throw new ApiError(500, error.message);
-    res.status(500).json({
-      success: false,
-      error: 'Failed to update disaster',
-    });
   }
 });
 
@@ -134,6 +176,18 @@ export const deleteDisaster = asyncHandler(async (req, res) => {
         id: disasterId,
       },
     });
+
+    // Emit disaster_deleted event using socket.io
+    const io = getSocket(req);
+    if (io) {
+      io.emit('disaster_deleted', {
+        event: 'disaster_deleted',
+        data: deletedDisaster,
+        message: `Disaster deleted: ${deletedDisaster.title}`,
+        timestamp: new Date().toISOString(),
+      });
+    }
+
     res.status(204).json(new ApiResponse(204, deletedDisaster, 'Disaster deleted'));
   } catch (error) {
     res.status(500).json({
@@ -177,106 +231,112 @@ export const getAllReports = asyncHandler(async (req, res) => {
   }
 });
 
-/**
- * GET /api/disasters/:id/reports
- * Get all reports for a specific disaster
- */
-// router.get('/:id/reports', async (req, res) => {
-//   try {
-//     const { reportModel } = await import('../models/index.js');
+export const getOfficialUpdates = asyncHandler(async (req, res) => {
+  try {
+    const disasterId = req.params.id;
+    const { refresh = false } = req.query;
 
-//     const reports = await reportModel.findByDisaster(req.params.id, {
-//       limit: 50,
-//       orderBy: { column: 'created_at', ascending: false },
-//     });
+    if (!disasterId) {
+      throw new ApiError(400, 'Disaster ID is required');
+    }
 
-//     res.json({
-//       success: true,
-//       data: reports,
-//     });
-//   } catch (error) {
-//     logger.error('Error fetching disaster reports:', error);
-//     res.status(500).json({
-//       success: false,
-//       error: 'Failed to fetch reports',
-//     });
-//   }
-// });
+    // Get the disaster to understand its type and location
+    const disaster = await Prisma.disaster.findUnique({
+      where: { id: disasterId },
+    });
 
-// /**
-//  * GET /api/disasters/:id/resources
-//  * Get all resources for a specific disaster
-//  */
-// router.get('/:id/resources', async (req, res) => {
-//   try {
-//     const { resourceModel } = await import('../models/index.js');
+    if (!disaster) {
+      throw new ApiError(404, 'Disaster not found');
+    }
 
-//     const resources = await resourceModel.findByDisaster(req.params.id, {
-//       limit: 100,
-//       orderBy: { column: 'created_at', ascending: false },
-//     });
+    // Import services dynamically to avoid circular imports
+    const { default: cacheService } = await import('../services/cacheService.js');
+    const { default: officialUpdatesService } = await import(
+      '../services/officialUpdatesService.js'
+    );
 
-//     res.json({
-//       success: true,
-//       data: resources,
-//     });
-//   } catch (error) {
-//     logger.error('Error fetching disaster resources:', error);
-//     res.status(500).json({
-//       success: false,
-//       error: 'Failed to fetch resources',
-//     });
-//   }
-// });
+    // Create cache key for official updates
+    const cacheKey = `official_updates_${disasterId}`;
 
-// /**
-//  * GET /api/disasters/statistics
-//  * Get disaster statistics
-//  */
-// router.get('/statistics', async (req, res) => {
-//   try {
-//     const stats = await disasterModel.getStatistics();
+    // Check if refresh is requested or cache doesn't exist
+    if (refresh === 'true') {
+      await cacheService.delete(cacheKey);
+      logger.info(`Cache refreshed for official updates: ${disasterId}`);
+    }
 
-//     res.json({
-//       success: true,
-//       data: stats,
-//     });
-//   } catch (error) {
-//     logger.error('Error fetching disaster statistics:', error);
-//     res.status(500).json({
-//       success: false,
-//       error: 'Failed to fetch statistics',
-//     });
-//   }
-// });
+    // Use cache service with getOrSet pattern
+    const officialUpdates = await cacheService.getOrSet(
+      cacheKey,
+      async () => {
+        logger.info(`Fetching fresh official updates for disaster: ${disasterId}`);
+        return await officialUpdatesService.fetchAllOfficialUpdates(disaster);
+      },
+      3600 // 1 hour TTL
+    );
 
-// /**
-//  * POST /api/disasters/:id/audit
-//  * Add audit trail entry
-//  */
-// router.post('/:id/audit', async (req, res) => {
-//   try {
-//     const { action, user_id } = req.body;
+    // Emit real-time update via WebSocket
+    const io = getSocket(req);
+    if (io) {
+      io.emit('official_updates_fetched', {
+        event: 'official_updates_fetched',
+        disaster_id: disasterId,
+        data: officialUpdates,
+        message: `Official updates available for ${disaster.title}`,
+        timestamp: new Date().toISOString(),
+      });
+    }
 
-//     if (!action || !user_id) {
-//       return res.status(400).json({
-//         success: false,
-//         error: 'Action and user_id are required',
-//       });
-//     }
+    // Log structured information
+    logger.info(`Official updates served for disaster: ${disasterId}`, {
+      disaster_id: disasterId,
+      disaster_title: disaster.title,
+      location: disaster.locationName,
+      updates_count: officialUpdates.updates?.length || 0,
+      sources_count: officialUpdates.source_count || 0,
+      cached: !refresh,
+    });
 
-//     const updatedDisaster = await disasterModel.addAuditTrail(req.params.id, action, user_id);
+    res
+      .status(200)
+      .json(
+        new ApiResponse(
+          200,
+          officialUpdates,
+          `Official updates fetched successfully (${
+            officialUpdates.updates?.length || 0
+          } updates from ${officialUpdates.source_count || 0} sources)`
+        )
+      );
+  } catch (error) {
+    logger.error('Error fetching official updates:', {
+      disaster_id: req.params.id,
+      error: error.message,
+      stack: error.stack,
+    });
 
-//     res.json({
-//       success: true,
-//       data: updatedDisaster,
-//       message: 'Audit trail updated successfully',
-//     });
-//   } catch (error) {
-//     logger.error('Error adding audit trail:', error);
-//     res.status(500).json({
-//       success: false,
-//       error: 'Failed to add audit trail',
-//     });
-//   }
-// });
+    // Return fallback data in case of complete failure
+    const fallbackData = {
+      disaster_id: req.params.id,
+      location: 'Unknown',
+      disaster_type: 'emergency',
+      updates: [
+        {
+          source: 'System',
+          title: 'Official Updates Temporarily Unavailable',
+          content:
+            'We are currently unable to fetch official updates. Please check government websites directly for the latest information.',
+          url: 'https://www.ready.gov',
+          timestamp: new Date().toISOString(),
+          priority: 'medium',
+        },
+      ],
+      last_updated: new Date().toISOString(),
+      source_count: 1,
+      error: true,
+    };
+
+    res
+      .status(200)
+      .json(new ApiResponse(200, fallbackData, 'Official updates service temporarily unavailable'));
+  }
+});

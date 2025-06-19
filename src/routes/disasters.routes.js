@@ -7,28 +7,24 @@ import {
   getAllDisasters,
   getAllReports,
   getDisasterById,
+  getOfficialUpdates,
   socialMedia,
   updateDisaster,
 } from '../controller/disaster.controller.js';
+import { createDisasterLimiter, externalApiLimiter } from '../middleware/rateLimiter.js';
 import { verifyJWT } from '../middleware/verifyToken.middleware.js';
 
 const router = express();
+
+router.use(verifyJWT);
 
 // Store multer image in memory
 
 const upload = multer({ storage: multer.memoryStorage() });
 
-// router.route('/').get(getAllDisasters);
-router.route('/').get(verifyJWT, getAllDisasters);
+router.route('/').get(getAllDisasters);
 
-// router.route('/:id').get(getDisasterById).put(updateDisaster).delete(deleteDisaster);
-router
-  .route('/:id')
-  .get(verifyJWT, getDisasterById)
-  .put(verifyJWT, updateDisaster)
-  .delete(verifyJWT, deleteDisaster);
-
-// router.route('/create').post(createDisaster);
+router.route('/:id').get(getDisasterById).put(updateDisaster).delete(deleteDisaster);
 
 // Verify Disaster image
 router.route('/:id/verify-image').post(upload.single('image'), verifyImage);
@@ -36,10 +32,12 @@ router.route('/:id/verify-image').post(upload.single('image'), verifyImage);
 // Extract location from description
 router.route('/geocode').post(upload.none(), Geolocation);
 
-router.route('/create').post(verifyJWT, createDisaster);
+router.route('/create').post(createDisasterLimiter, createDisaster);
 
-router.route('/social-media').get(verifyJWT, socialMedia);
+router.route('/social-media').get(socialMedia);
 // all all reports for a disaster
-router.route('/:id/reports').get(verifyJWT, getAllReports);
+router.route('/:id/reports').get(getAllReports);
+// Get official updates for a disaster with rate limiting
+router.route('/:id/official-updates').get(externalApiLimiter, getOfficialUpdates);
 
 export default router;

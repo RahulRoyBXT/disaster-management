@@ -1,9 +1,11 @@
 import compression from 'compression';
 import cookieParser from 'cookie-parser';
+import cors from 'cors';
 import express from 'express';
 import disasterRoutes from './routes/disasters.routes.js';
 import resourceRoute from './routes/resources.routes.js';
 import userRoute from './routes/users.route.js';
+
 const app = express();
 
 // Will add it later
@@ -43,13 +45,13 @@ const app = express();
 // );
 
 // CORS configuration
-// app.use(
-//   cors({
-//     origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
-//     credentials: true,
-//     optionsSuccessStatus: 200,
-//   })
-// );
+app.use(
+  cors({
+    origin: process.env.CORS_ORIGIN,
+    credentials: true,
+    optionsSuccessStatus: 200,
+  })
+);
 
 // Rate limiting
 // const limiter = rateLimit({

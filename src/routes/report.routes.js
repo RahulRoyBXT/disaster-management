@@ -9,11 +9,9 @@ import { verifyJWT } from '../middleware/auth.middleware.js';
 
 const router = express.Router();
 
+router.use(verifyJWT);
 // create a report
-router.route('/').post(verifyJWT, createReport);
+router.route('/').post(createReport);
+
 // get a report, update an existing report, or delete a report
-router
-  .route('/:id')
-  .get(verifyJWT, getReport)
-  .put(verifyJWT, updateReport)
-  .delete(verifyJWT, deleteReport);
+router.route('/:id').get(getReport).put(updateReport).delete(deleteReport);

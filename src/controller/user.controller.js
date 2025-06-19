@@ -9,7 +9,7 @@ const prisma = new PrismaClient();
 // validation required
 export const registerController = asyncHandler(async (req, res) => {
   const { email, username, password } = req.body;
-  console.log(email, password, username);
+  console.log(req.body);
   console.log(process.env.DATABASE_URL);
   if ((!email && !username) || !password) {
     throw new ApiError(400, 'All fields are required');
