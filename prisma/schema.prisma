@@ -18,7 +18,7 @@ model User {
   id        String    @id @default(cuid())
   username  String    @unique
   email     String    @unique
-  role      Role?      @default(CONTRIBUTOR)
+  role      Role      @default(CONTRIBUTOR)
   createdAt DateTime  @default(now())
   password  String?    
   // Relations
@@ -45,6 +45,12 @@ model Disaster {
   auditTrail    Json?       @default("{}")
   reports       Report[]
   resources     Resource[]
+}
+
+enum verificationStatus{
+  PENDING
+  VERIFIED
+  REJECTED
 }
 
 model Report {

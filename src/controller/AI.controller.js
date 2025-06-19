@@ -37,7 +37,6 @@ export const verifyImage = asyncHandler(async (req, res) => {
     },
   ]);
 
-  console.log('result:', result);
 
   const response = await result.response;
 
@@ -73,12 +72,12 @@ export const Geolocation = asyncHandler(async (req, res) => {
     locationName
   )}&format=json&limit=1`;
   const res2 = await fetch(url, {
-    headers: { 'User-Agent': 'DisasterApp/1.0' },
+    headers: { 'User-Agent': 'Disaster-Management/1.0' },
   });
 
   const data = await res2.json();
   if (!data.length) throw new Error('Location not found');
 
   const { lat, lon } = data[0];
-  res.json({ data: { lat: parseFloat(lat), lng: parseFloat(lon) } });
+  res.json({ data: { locationName: locationName, lat: parseFloat(lat), lng: parseFloat(lon) } });
 });
