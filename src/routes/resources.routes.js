@@ -8,7 +8,6 @@ import {
 import { verifyJWT } from '../middleware/verifyToken.middleware.js';
 const router = express.Router();
 
-router.use(verifyJWT);
 
 router.route('/create').post(createResource);
 router.route('/update').post(updateResource);
