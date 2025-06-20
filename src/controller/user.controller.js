@@ -6,14 +6,11 @@ import { asyncHandler } from '../utils/asyncHandler.js';
 import { generateToken } from '../utils/generateToken.js';
 const prisma = new PrismaClient();
 
-// validation required
+// Using validation middleware
 export const registerController = asyncHandler(async (req, res) => {
-  const { email, username, password } = req.body;
-  console.log(req.body);
-  console.log(process.env.DATABASE_URL);
-  if ((!email && !username) || !password) {
-    throw new ApiError(400, 'All fields are required');
-  }
+  // req.validatedData contains the data that has been validated by the middleware
+  const { email, username, password } = req.validatedData || req.body;
+
   const existedUser = await prisma.user.findFirst({
     where: {
       OR: [{ email }, { username }],
@@ -21,8 +18,9 @@ export const registerController = asyncHandler(async (req, res) => {
   });
 
   if (existedUser) {
-    throw new ApiError(409, 'User with email or username is already exists');
+    throw new ApiError(409, 'User with email or username already exists');
   }
+
   const hashedPassword = await bcrypt.hash(password, 10);
   const createdUser = await prisma.user.create({
     data: {
@@ -33,18 +31,15 @@ export const registerController = asyncHandler(async (req, res) => {
   });
 
   if (!createdUser) {
-    throw new ApiError(500, 'Something Went wrong while creating user');
+    throw new ApiError(500, 'Something went wrong while creating user');
   }
 
-  return res.status(201).json(new ApiResponse(200, createdUser, 'Users created successfully'));
+  return res.status(201).json(new ApiResponse(200, createdUser, 'User created successfully'));
 });
 
 export const loginUser = asyncHandler(async (req, res) => {
-  const { username, password } = req.body;
-
-  if (!username || !password) {
-    throw new ApiError(400, 'Username and password are required');
-  }
+  // req.validatedData contains the data that has been validated by the middleware
+  const { username, password } = req.validatedData || req.body;
 
   // Get user with password field included
   const user = await prisma.user.findUnique({
@@ -70,10 +65,10 @@ export const loginUser = asyncHandler(async (req, res) => {
   if (!isPasswordValid) {
     throw new ApiError(401, 'Invalid credentials');
   }
-
   const Token = generateToken(username);
 
   // Remove password from user object
+  // eslint-disable-next-line no-unused-vars
   const { password: _, ...loggedInUser } = user;
 
   const options = {

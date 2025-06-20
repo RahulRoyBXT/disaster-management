@@ -1,8 +1,7 @@
-/**
- * 404 Not Found handler middleware
- * Handles requests to non-existent routes
- */
-export const notFoundHandler = (req, res, next) => {
+// 404 Not Found handler middleware
+//  Handles requests to non-existent routes
+
+const notFoundHandler = (req, res, next) => {
   const message = `Route ${req.originalUrl} not found`;
 
   res.status(404).json({
@@ -14,11 +13,10 @@ export const notFoundHandler = (req, res, next) => {
       method: req.method,
       timestamp: new Date().toISOString(),
       availableEndpoints: {
-        health: '/api/health',
-        disasters: '/api/disasters',
-        reports: '/api/reports',
-        resources: '/api/resources',
-        cache: '/api/cache',
+        root: '/',
+        users: '/api/v1/users',
+        disasters: '/api/v1/disasters',
+        resources: '/resources',
       },
     },
   });

@@ -1,10 +1,11 @@
+import { ApiError } from '../utils/apiError.js';
 import { logger } from '../utils/logger.js';
 
 /**
  * Global error handler middleware
  * Catches and formats all errors in a consistent way
  */
-export const errorHandler = (err, req, res, next) => {
+const errorHandler = (err, req, res, next) => {
   let error = { ...err };
   error.message = err.message;
 
@@ -17,23 +18,27 @@ export const errorHandler = (err, req, res, next) => {
     stack: err.stack,
   });
 
-  // Mongoose bad ObjectId
-  if (err.name === 'CastError') {
-    const message = 'Resource not found';
-    error = { message, statusCode: 404 };
+  // Check for Prisma errors
+  if (err.name === 'PrismaClientKnownRequestError') {
+    // Handle specific Prisma error codes
+    if (err.code === 'P2002') {
+      const message = 'Unique constraint violation';
+      error = { message, statusCode: 409 };
+    } else if (err.code === 'P2025') {
+      const message = 'Record not found';
+      error = { message, statusCode: 404 };
+    } else if (err.code === 'P2003') {
+      const message = 'Foreign key constraint violation';
+      error = { message, statusCode: 400 };
+    } else {
+      const message = 'Database error';
+      error = { message, statusCode: 500 };
+    }
   }
 
-  // Mongoose duplicate key
-  if (err.code === 11000) {
-    const message = 'Duplicate field value entered';
-    error = { message, statusCode: 400 };
-  }
-
-  // Mongoose validation error
+  // Handle validation errors
   if (err.name === 'ValidationError') {
-    const message = Object.values(err.errors)
-      .map(val => val.message)
-      .join(', ');
+    const message = err.errors ? Object.values(err.errors).join(', ') : 'Validation error';
     error = { message, statusCode: 400 };
   }
 
@@ -48,21 +53,13 @@ export const errorHandler = (err, req, res, next) => {
     error = { message, statusCode: 401 };
   }
 
-  // Supabase errors
-  if (err.code && err.message) {
-    // Common Supabase error codes
-    const supabaseErrors = {
-      PGRST116: { message: 'Resource not found', statusCode: 404 },
-      PGRST204: { message: 'Resource not found', statusCode: 404 },
-      23505: { message: 'Duplicate entry', statusCode: 409 },
-      23503: { message: 'Foreign key constraint violation', statusCode: 400 },
-      23502: { message: 'Required field missing', statusCode: 400 },
-      42501: { message: 'Insufficient permissions', statusCode: 403 },
+  // Handle custom ApiError instances
+  if (err instanceof ApiError) {
+    error = {
+      message: err.message,
+      statusCode: err.statusCode,
+      errors: err.errors,
     };
-
-    if (supabaseErrors[err.code]) {
-      error = supabaseErrors[err.code];
-    }
   }
 
   // Rate limiting errors
@@ -85,7 +82,7 @@ export const errorHandler = (err, req, res, next) => {
       statusCode,
       ...(process.env.NODE_ENV === 'development' && {
         stack: err.stack,
-        details: error,
+        details: error.errors || error,
       }),
     },
   };
@@ -101,7 +98,7 @@ export const errorHandler = (err, req, res, next) => {
     };
   }
 
-  res.status(statusCode).json(errorResponse);
+  return res.status(statusCode).json(errorResponse);
 };
 
 export default errorHandler;

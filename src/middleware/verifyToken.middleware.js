@@ -21,7 +21,7 @@ export const verifyJWT = asyncHandler(async (req, _, next) => {
         username: decodedToken.username,
       },
     });
-    const { password: _, ...userData } = user;
+    const { password, ...userData } = user;
     console.log(userData);
     if (!userData) {
       throw new ApiError(401, 'Invalid Token');
@@ -29,6 +29,6 @@ export const verifyJWT = asyncHandler(async (req, _, next) => {
     req.user = userData;
     next();
   } catch (error) {
-    throw new ApiError(401, error?.message || 'Invalid Access Token');
+    next(error);
   }
 });

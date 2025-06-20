@@ -8,16 +8,21 @@ import {
 } from '../controller/user.controller.js';
 
 import multer from 'multer';
+import { validateRequest } from '../middleware/validation.middleware.js';
 import { verifyJWT } from '../middleware/verifyToken.middleware.js';
+import { loginUserSchema, registerUserSchema } from '../validation/user.validation.js';
 
 const upload = multer();
 
 const router = express.Router();
 
-router.route('/register').post(upload.none(), registerController);
 router.route('/profile').post(verifyJWT, getUserProfile);
-router.route('/login').post(upload.none(), loginUser);
 
+router
+  .route('/register')
+  .post(upload.none(), validateRequest(registerUserSchema), registerController);
+
+router.route('/login').post(upload.none(), validateRequest(loginUserSchema), loginUser);
 
 router.route('/logout').post(verifyJWT, logOut);
 

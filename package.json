@@ -30,6 +30,7 @@
     "axios": "^1.10.0",
     "bcryptjs": "^3.0.2",
     "cheerio": "^1.1.0",
+    "cloudinary": "^2.7.0",
     "compression": "^1.7.4",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
@@ -45,7 +46,8 @@
     "socket.io": "^4.8.1",
     "user-agents": "^1.1.575",
     "uuid": "^9.0.1",
-    "winston": "^3.11.0"
+    "winston": "^3.11.0",
+    "zod": "^3.25.67"
   },
   "devDependencies": {
     "@eslint/js": "^8.56.0",

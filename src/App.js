@@ -6,20 +6,16 @@ import disasterRoutes from './routes/disasters.routes.js';
 import reportRoutes from './routes/report.routes.js';
 import resourceRoute from './routes/resources.routes.js';
 import userRoute from './routes/users.route.js';
-
-const app = express();
-
-// Will add it later
+import { logger } from './utils/logger.js';
+import errorHandler from './middleware/errorHandler.js';
+import notFoundHandler from './middleware/notFoundHandler.js';
 
 // import helmet from 'helmet';
 // import morgan from 'morgan';
 // import rateLimit from 'express-rate-limit';
-
 // import dotenv from 'dotenv';
 
-// import { logger } from './utils/logger.js';
-// import { errorHandler } from './middleware/errorHandler.js';
-// import { notFoundHandler } from './middleware/notFoundHandler.js';
+const app = express();
 
 // Import route modules
 // import disasterRoutes from './routes/disasters.js';
@@ -123,31 +119,32 @@ app.get('/', (req, res) => {
 });
 
 // Error handling middleware
-// app.use(notFoundHandler);
-// app.use(errorHandler);
+app.use(notFoundHandler);
+app.use(errorHandler);
 
 // Start server
-// const server = app.listen(PORT, () => {
-//   logger.info(`🚀 Disaster Management Server running on port ${PORT}`);
-//   logger.info(`🌐 Environment: ${process.env.NODE_ENV || 'development'}`);
-//   logger.info(`📊 Health check: http://localhost:${PORT}/api/health`);
-// });
+const PORT = process.env.PORT || 3000;
+const server = app.listen(PORT, () => {
+  logger.info(`🚀 Disaster Management Server running on port ${PORT}`);
+  logger.info(`🌐 Environment: ${process.env.NODE_ENV || 'development'}`);
+  logger.info(`📊 Health check: http://localhost:${PORT}/api/health`);
+});
 
-// // Graceful shutdown handling
-// process.on('SIGTERM', () => {
-//   logger.info('SIGTERM received, shutting down gracefully');
-//   server.close(() => {
-//     logger.info('Process terminated');
-//     process.exit(0);
-//   });
-// });
+// Graceful shutdown handling
+process.on('SIGTERM', () => {
+  logger.info('SIGTERM received, shutting down gracefully');
+  server.close(() => {
+    logger.info('Process terminated');
+    process.exit(0);
+  });
+});
 
-// process.on('SIGINT', () => {
-//   logger.info('SIGINT received, shutting down gracefully');
-//   server.close(() => {
-//     logger.info('Process terminated');
-//     process.exit(0);
-//   });
-// });
+process.on('SIGINT', () => {
+  logger.info('SIGINT received, shutting down gracefully');
+  server.close(() => {
+    logger.info('Process terminated');
+    process.exit(0);
+  });
+});
 
 export default app;
