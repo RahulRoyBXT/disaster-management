@@ -149,7 +149,8 @@ exports.Prisma.ReportScalarFieldEnum = {
   content: 'content',
   imageUrl: 'imageUrl',
   verificationStatus: 'verificationStatus',
-  createdAt: 'createdAt'
+  createdAt: 'createdAt',
+  metadata: 'metadata'
 };
 
 exports.Prisma.ResourceScalarFieldEnum = {
@@ -166,12 +167,23 @@ exports.Prisma.ResourceScalarFieldEnum = {
 exports.Prisma.CacheScalarFieldEnum = {
   key: 'key',
   value: 'value',
-  expiresAt: 'expiresAt'
+  expires_at: 'expires_at',
+  created_at: 'created_at',
+  updated_at: 'updated_at',
+  access_count: 'access_count',
+  last_accessed: 'last_accessed',
+  tags: 'tags',
+  metadata: 'metadata'
 };
 
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
+};
+
+exports.Prisma.NullableJsonNullValueInput = {
+  DbNull: Prisma.DbNull,
+  JsonNull: Prisma.JsonNull
 };
 
 exports.Prisma.JsonNullValueInput = {

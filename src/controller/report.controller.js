@@ -8,19 +8,24 @@ const Prisma = new PrismaClient();
 // TODO: check all controller
 
 export const createReport = asyncHandler(async (req, res) => {
-  const { disasterId, content } = req.body;
-  const file = req.file;
+  // Get validated data from middleware
+  const { disasterId, content, imageURL } = req.validatedData || req.body;
+  // const file = req.file;
 
-  if (!disasterId || !content || !file) {
-    throw new ApiError(400, 'Missing required fields');
-  }
+  // if (!file) {
+  //   throw new ApiError(400, 'Image file is required');
+  // }
 
   const report = await Prisma.report.create({
     data: {
-      disasterId,
       content,
-      imageUrl: file.path, // Assuming file.path contains the URL or path to the uploaded image
-      ownerId: req.user.id, // Assuming req.user.id contains the ID of the user creating the report
+      imageUrl: imageURL, // Assuming file.path contains the URL or path to the uploaded image
+      disaster: {
+        connect: { id: disasterId }, // Connect the report to the disaster
+      },
+      user: {
+        connect: { id: req.user.id }, // Connect the report to the user
+      },
     },
   });
 
@@ -28,11 +33,8 @@ export const createReport = asyncHandler(async (req, res) => {
 });
 
 export const getReport = asyncHandler(async (req, res) => {
-  const { id } = req.params;
-
-  if (!id) {
-    throw new ApiError(400, 'Report ID is required');
-  }
+  // Get validated params from middleware
+  const { id } = req.validatedParams || req.params;
 
   const report = await Prisma.report.findUnique({
     where: { id },
@@ -50,27 +52,21 @@ export const getReport = asyncHandler(async (req, res) => {
 });
 
 export const updateReport = asyncHandler(async (req, res) => {
-  const { id } = req.params;
-  const { content } = req.body;
-
-  if (!id || !content) {
-    throw new ApiError(400, 'Missing required fields');
-  }
+  // Get validated data and params from middleware
+  const { id } = req.validatedParams || req.params;
+  const { content, imageUrl } = req.validatedData || req.body;
 
   const report = await Prisma.report.update({
     where: { id },
-    data: { content },
+    data: { content, imageUrl },
   });
 
   return res.status(200).json(new ApiResponse(200, report, 'Report updated successfully'));
 });
 
 export const deleteReport = asyncHandler(async (req, res) => {
-  const { id } = req.params;
-
-  if (!id) {
-    throw new ApiError(400, 'Report ID is required');
-  }
+  // Get validated params from middleware
+  const { id } = req.validatedParams || req.params;
 
   const report = await Prisma.report.delete({
     where: { id },

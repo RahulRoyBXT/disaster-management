@@ -20,7 +20,7 @@ model User {
   email     String     @unique
   role      Role       @default(CONTRIBUTOR)
   createdAt DateTime   @default(now())
-  password  String
+  password  String?
   // Relations
   disasters Disaster[] @relation("UserDisasters")
   reports   Report[]
@@ -42,9 +42,15 @@ model Disaster {
   ownerId      String
   owner        User       @relation("UserDisasters", fields: [ownerId], references: [id])
   createdAt    DateTime   @default(now())
-  auditTrail   Json       @default("{}")
+  auditTrail   Json?      @default("{}")
   reports      Report[]
   resources    Resource[]
+}
+
+enum verificationStatus {
+  PENDING
+  VERIFIED
+  REJECTED
 }
 
 model Report {
@@ -57,6 +63,7 @@ model Report {
   imageUrl           String
   verificationStatus VerificationStatus @default(PENDING)
   createdAt          DateTime           @default(now())
+  metadata           Json?              @default("{}")
 }
 
 enum VerificationStatus {
@@ -78,7 +85,19 @@ model Resource {
 }
 
 model Cache {
-  key       String   @id
-  value     Json
-  expiresAt DateTime
+  key           String    @id
+  value         Json
+  expires_at    DateTime  @map("expiresAt")
+  created_at    DateTime  @default(now()) @map("createdAt")
+  updated_at    DateTime  @updatedAt @map("updatedAt")
+  access_count  Int       @default(1) @map("accessCount")
+  last_accessed DateTime? @map("lastAccessed")
+  tags          String[]  @default([])
+  metadata      Json?     @default("{}")
+
+  @@index([expires_at])
+  @@index([tags])
+  @@index([access_count(sort: Desc)])
+  @@index([created_at(sort: Desc)])
+  @@map("cache")
 }

@@ -51,6 +51,15 @@ export namespace $Enums {
 export type Role = (typeof Role)[keyof typeof Role]
 
 
+export const verificationStatus: {
+  PENDING: 'PENDING',
+  VERIFIED: 'VERIFIED',
+  REJECTED: 'REJECTED'
+};
+
+export type verificationStatus = (typeof verificationStatus)[keyof typeof verificationStatus]
+
+
 export const VerificationStatus: {
   PENDING: 'PENDING',
   VERIFIED: 'VERIFIED',
@@ -64,6 +73,10 @@ export type VerificationStatus = (typeof VerificationStatus)[keyof typeof Verifi
 export type Role = $Enums.Role
 
 export const Role: typeof $Enums.Role
+
+export type verificationStatus = $Enums.verificationStatus
+
+export const verificationStatus: typeof $Enums.verificationStatus
 
 export type VerificationStatus = $Enums.VerificationStatus
 
@@ -1485,9 +1498,9 @@ export namespace Prisma {
     id: string
     username: string
     email: string
-    role: $Enums.Role | null
+    role: $Enums.Role
     createdAt: Date
-    password: string
+    password: string | null
     _count: UserCountAggregateOutputType | null
     _min: UserMinAggregateOutputType | null
     _max: UserMaxAggregateOutputType | null
@@ -1565,9 +1578,9 @@ export namespace Prisma {
       id: string
       username: string
       email: string
-      role: $Enums.Role | null
+      role: $Enums.Role
       createdAt: Date
-      password: string
+      password: string | null
     }, ExtArgs["result"]["user"]>
     composites: {}
   }
@@ -2654,7 +2667,7 @@ export namespace Prisma {
     tags: string[]
     ownerId: string
     createdAt: Date
-    auditTrail: JsonValue
+    auditTrail: JsonValue | null
     _count: DisasterCountAggregateOutputType | null
     _avg: DisasterAvgAggregateOutputType | null
     _sum: DisasterSumAggregateOutputType | null
@@ -2765,7 +2778,7 @@ export namespace Prisma {
       tags: string[]
       ownerId: string
       createdAt: Date
-      auditTrail: Prisma.JsonValue
+      auditTrail: Prisma.JsonValue | null
     }, ExtArgs["result"]["disaster"]>
     composites: {}
   }
@@ -3702,6 +3715,7 @@ export namespace Prisma {
     imageUrl: number
     verificationStatus: number
     createdAt: number
+    metadata: number
     _all: number
   }
 
@@ -3734,6 +3748,7 @@ export namespace Prisma {
     imageUrl?: true
     verificationStatus?: true
     createdAt?: true
+    metadata?: true
     _all?: true
   }
 
@@ -3817,6 +3832,7 @@ export namespace Prisma {
     imageUrl: string
     verificationStatus: $Enums.VerificationStatus
     createdAt: Date
+    metadata: JsonValue | null
     _count: ReportCountAggregateOutputType | null
     _min: ReportMinAggregateOutputType | null
     _max: ReportMaxAggregateOutputType | null
@@ -3844,6 +3860,7 @@ export namespace Prisma {
     imageUrl?: boolean
     verificationStatus?: boolean
     createdAt?: boolean
+    metadata?: boolean
     disaster?: boolean | DisasterDefaultArgs<ExtArgs>
     user?: boolean | UserDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["report"]>
@@ -3856,6 +3873,7 @@ export namespace Prisma {
     imageUrl?: boolean
     verificationStatus?: boolean
     createdAt?: boolean
+    metadata?: boolean
     disaster?: boolean | DisasterDefaultArgs<ExtArgs>
     user?: boolean | UserDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["report"]>
@@ -3868,6 +3886,7 @@ export namespace Prisma {
     imageUrl?: boolean
     verificationStatus?: boolean
     createdAt?: boolean
+    metadata?: boolean
     disaster?: boolean | DisasterDefaultArgs<ExtArgs>
     user?: boolean | UserDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["report"]>
@@ -3880,9 +3899,10 @@ export namespace Prisma {
     imageUrl?: boolean
     verificationStatus?: boolean
     createdAt?: boolean
+    metadata?: boolean
   }
 
-  export type ReportOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "disasterId" | "userId" | "content" | "imageUrl" | "verificationStatus" | "createdAt", ExtArgs["result"]["report"]>
+  export type ReportOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "disasterId" | "userId" | "content" | "imageUrl" | "verificationStatus" | "createdAt" | "metadata", ExtArgs["result"]["report"]>
   export type ReportInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     disaster?: boolean | DisasterDefaultArgs<ExtArgs>
     user?: boolean | UserDefaultArgs<ExtArgs>
@@ -3910,6 +3930,7 @@ export namespace Prisma {
       imageUrl: string
       verificationStatus: $Enums.VerificationStatus
       createdAt: Date
+      metadata: Prisma.JsonValue | null
     }, ExtArgs["result"]["report"]>
     composites: {}
   }
@@ -4342,6 +4363,7 @@ export namespace Prisma {
     readonly imageUrl: FieldRef<"Report", 'String'>
     readonly verificationStatus: FieldRef<"Report", 'VerificationStatus'>
     readonly createdAt: FieldRef<"Report", 'DateTime'>
+    readonly metadata: FieldRef<"Report", 'Json'>
   }
     
 
@@ -5897,42 +5919,88 @@ export namespace Prisma {
 
   export type AggregateCache = {
     _count: CacheCountAggregateOutputType | null
+    _avg: CacheAvgAggregateOutputType | null
+    _sum: CacheSumAggregateOutputType | null
     _min: CacheMinAggregateOutputType | null
     _max: CacheMaxAggregateOutputType | null
   }
 
+  export type CacheAvgAggregateOutputType = {
+    access_count: number | null
+  }
+
+  export type CacheSumAggregateOutputType = {
+    access_count: number | null
+  }
+
   export type CacheMinAggregateOutputType = {
     key: string | null
-    expiresAt: Date | null
+    expires_at: Date | null
+    created_at: Date | null
+    updated_at: Date | null
+    access_count: number | null
+    last_accessed: Date | null
   }
 
   export type CacheMaxAggregateOutputType = {
     key: string | null
-    expiresAt: Date | null
+    expires_at: Date | null
+    created_at: Date | null
+    updated_at: Date | null
+    access_count: number | null
+    last_accessed: Date | null
   }
 
   export type CacheCountAggregateOutputType = {
     key: number
     value: number
-    expiresAt: number
+    expires_at: number
+    created_at: number
+    updated_at: number
+    access_count: number
+    last_accessed: number
+    tags: number
+    metadata: number
     _all: number
   }
 
 
+  export type CacheAvgAggregateInputType = {
+    access_count?: true
+  }
+
+  export type CacheSumAggregateInputType = {
+    access_count?: true
+  }
+
   export type CacheMinAggregateInputType = {
     key?: true
-    expiresAt?: true
+    expires_at?: true
+    created_at?: true
+    updated_at?: true
+    access_count?: true
+    last_accessed?: true
   }
 
   export type CacheMaxAggregateInputType = {
     key?: true
-    expiresAt?: true
+    expires_at?: true
+    created_at?: true
+    updated_at?: true
+    access_count?: true
+    last_accessed?: true
   }
 
   export type CacheCountAggregateInputType = {
     key?: true
     value?: true
-    expiresAt?: true
+    expires_at?: true
+    created_at?: true
+    updated_at?: true
+    access_count?: true
+    last_accessed?: true
+    tags?: true
+    metadata?: true
     _all?: true
   }
 
@@ -5974,6 +6042,18 @@ export namespace Prisma {
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
      * 
+     * Select which fields to average
+    **/
+    _avg?: CacheAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: CacheSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
      * Select which fields to find the minimum value
     **/
     _min?: CacheMinAggregateInputType
@@ -6004,6 +6084,8 @@ export namespace Prisma {
     take?: number
     skip?: number
     _count?: CacheCountAggregateInputType | true
+    _avg?: CacheAvgAggregateInputType
+    _sum?: CacheSumAggregateInputType
     _min?: CacheMinAggregateInputType
     _max?: CacheMaxAggregateInputType
   }
@@ -6011,8 +6093,16 @@ export namespace Prisma {
   export type CacheGroupByOutputType = {
     key: string
     value: JsonValue
-    expiresAt: Date
+    expires_at: Date
+    created_at: Date
+    updated_at: Date
+    access_count: number
+    last_accessed: Date | null
+    tags: string[]
+    metadata: JsonValue | null
     _count: CacheCountAggregateOutputType | null
+    _avg: CacheAvgAggregateOutputType | null
+    _sum: CacheSumAggregateOutputType | null
     _min: CacheMinAggregateOutputType | null
     _max: CacheMaxAggregateOutputType | null
   }
@@ -6034,28 +6124,52 @@ export namespace Prisma {
   export type CacheSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     key?: boolean
     value?: boolean
-    expiresAt?: boolean
+    expires_at?: boolean
+    created_at?: boolean
+    updated_at?: boolean
+    access_count?: boolean
+    last_accessed?: boolean
+    tags?: boolean
+    metadata?: boolean
   }, ExtArgs["result"]["cache"]>
 
   export type CacheSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     key?: boolean
     value?: boolean
-    expiresAt?: boolean
+    expires_at?: boolean
+    created_at?: boolean
+    updated_at?: boolean
+    access_count?: boolean
+    last_accessed?: boolean
+    tags?: boolean
+    metadata?: boolean
   }, ExtArgs["result"]["cache"]>
 
   export type CacheSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     key?: boolean
     value?: boolean
-    expiresAt?: boolean
+    expires_at?: boolean
+    created_at?: boolean
+    updated_at?: boolean
+    access_count?: boolean
+    last_accessed?: boolean
+    tags?: boolean
+    metadata?: boolean
   }, ExtArgs["result"]["cache"]>
 
   export type CacheSelectScalar = {
     key?: boolean
     value?: boolean
-    expiresAt?: boolean
+    expires_at?: boolean
+    created_at?: boolean
+    updated_at?: boolean
+    access_count?: boolean
+    last_accessed?: boolean
+    tags?: boolean
+    metadata?: boolean
   }
 
-  export type CacheOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"key" | "value" | "expiresAt", ExtArgs["result"]["cache"]>
+  export type CacheOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"key" | "value" | "expires_at" | "created_at" | "updated_at" | "access_count" | "last_accessed" | "tags" | "metadata", ExtArgs["result"]["cache"]>
 
   export type $CachePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "Cache"
@@ -6063,7 +6177,13 @@ export namespace Prisma {
     scalars: $Extensions.GetPayloadResult<{
       key: string
       value: Prisma.JsonValue
-      expiresAt: Date
+      expires_at: Date
+      created_at: Date
+      updated_at: Date
+      access_count: number
+      last_accessed: Date | null
+      tags: string[]
+      metadata: Prisma.JsonValue | null
     }, ExtArgs["result"]["cache"]>
     composites: {}
   }
@@ -6489,7 +6609,13 @@ export namespace Prisma {
   interface CacheFieldRefs {
     readonly key: FieldRef<"Cache", 'String'>
     readonly value: FieldRef<"Cache", 'Json'>
-    readonly expiresAt: FieldRef<"Cache", 'DateTime'>
+    readonly expires_at: FieldRef<"Cache", 'DateTime'>
+    readonly created_at: FieldRef<"Cache", 'DateTime'>
+    readonly updated_at: FieldRef<"Cache", 'DateTime'>
+    readonly access_count: FieldRef<"Cache", 'Int'>
+    readonly last_accessed: FieldRef<"Cache", 'DateTime'>
+    readonly tags: FieldRef<"Cache", 'String[]'>
+    readonly metadata: FieldRef<"Cache", 'Json'>
   }
     
 
@@ -6905,7 +7031,8 @@ export namespace Prisma {
     content: 'content',
     imageUrl: 'imageUrl',
     verificationStatus: 'verificationStatus',
-    createdAt: 'createdAt'
+    createdAt: 'createdAt',
+    metadata: 'metadata'
   };
 
   export type ReportScalarFieldEnum = (typeof ReportScalarFieldEnum)[keyof typeof ReportScalarFieldEnum]
@@ -6928,7 +7055,13 @@ export namespace Prisma {
   export const CacheScalarFieldEnum: {
     key: 'key',
     value: 'value',
-    expiresAt: 'expiresAt'
+    expires_at: 'expires_at',
+    created_at: 'created_at',
+    updated_at: 'updated_at',
+    access_count: 'access_count',
+    last_accessed: 'last_accessed',
+    tags: 'tags',
+    metadata: 'metadata'
   };
 
   export type CacheScalarFieldEnum = (typeof CacheScalarFieldEnum)[keyof typeof CacheScalarFieldEnum]
@@ -6940,6 +7073,14 @@ export namespace Prisma {
   };
 
   export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder]
+
+
+  export const NullableJsonNullValueInput: {
+    DbNull: typeof DbNull,
+    JsonNull: typeof JsonNull
+  };
+
+  export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
 
 
   export const JsonNullValueInput: {
@@ -7087,9 +7228,9 @@ export namespace Prisma {
     id?: StringFilter<"User"> | string
     username?: StringFilter<"User"> | string
     email?: StringFilter<"User"> | string
-    role?: EnumRoleNullableFilter<"User"> | $Enums.Role | null
+    role?: EnumRoleFilter<"User"> | $Enums.Role
     createdAt?: DateTimeFilter<"User"> | Date | string
-    password?: StringFilter<"User"> | string
+    password?: StringNullableFilter<"User"> | string | null
     disasters?: DisasterListRelationFilter
     reports?: ReportListRelationFilter
   }
@@ -7098,9 +7239,9 @@ export namespace Prisma {
     id?: SortOrder
     username?: SortOrder
     email?: SortOrder
-    role?: SortOrderInput | SortOrder
+    role?: SortOrder
     createdAt?: SortOrder
-    password?: SortOrder
+    password?: SortOrderInput | SortOrder
     disasters?: DisasterOrderByRelationAggregateInput
     reports?: ReportOrderByRelationAggregateInput
   }
@@ -7112,9 +7253,9 @@ export namespace Prisma {
     AND?: UserWhereInput | UserWhereInput[]
     OR?: UserWhereInput[]
     NOT?: UserWhereInput | UserWhereInput[]
-    role?: EnumRoleNullableFilter<"User"> | $Enums.Role | null
+    role?: EnumRoleFilter<"User"> | $Enums.Role
     createdAt?: DateTimeFilter<"User"> | Date | string
-    password?: StringFilter<"User"> | string
+    password?: StringNullableFilter<"User"> | string | null
     disasters?: DisasterListRelationFilter
     reports?: ReportListRelationFilter
   }, "id" | "username" | "email">
@@ -7123,9 +7264,9 @@ export namespace Prisma {
     id?: SortOrder
     username?: SortOrder
     email?: SortOrder
-    role?: SortOrderInput | SortOrder
+    role?: SortOrder
     createdAt?: SortOrder
-    password?: SortOrder
+    password?: SortOrderInput | SortOrder
     _count?: UserCountOrderByAggregateInput
     _max?: UserMaxOrderByAggregateInput
     _min?: UserMinOrderByAggregateInput
@@ -7138,9 +7279,9 @@ export namespace Prisma {
     id?: StringWithAggregatesFilter<"User"> | string
     username?: StringWithAggregatesFilter<"User"> | string
     email?: StringWithAggregatesFilter<"User"> | string
-    role?: EnumRoleNullableWithAggregatesFilter<"User"> | $Enums.Role | null
+    role?: EnumRoleWithAggregatesFilter<"User"> | $Enums.Role
     createdAt?: DateTimeWithAggregatesFilter<"User"> | Date | string
-    password?: StringWithAggregatesFilter<"User"> | string
+    password?: StringNullableWithAggregatesFilter<"User"> | string | null
   }
 
   export type DisasterWhereInput = {
@@ -7156,7 +7297,7 @@ export namespace Prisma {
     tags?: StringNullableListFilter<"Disaster">
     ownerId?: StringFilter<"Disaster"> | string
     createdAt?: DateTimeFilter<"Disaster"> | Date | string
-    auditTrail?: JsonFilter<"Disaster">
+    auditTrail?: JsonNullableFilter<"Disaster">
     owner?: XOR<UserScalarRelationFilter, UserWhereInput>
     reports?: ReportListRelationFilter
     resources?: ResourceListRelationFilter
@@ -7172,7 +7313,7 @@ export namespace Prisma {
     tags?: SortOrder
     ownerId?: SortOrder
     createdAt?: SortOrder
-    auditTrail?: SortOrder
+    auditTrail?: SortOrderInput | SortOrder
     owner?: UserOrderByWithRelationInput
     reports?: ReportOrderByRelationAggregateInput
     resources?: ResourceOrderByRelationAggregateInput
@@ -7191,7 +7332,7 @@ export namespace Prisma {
     tags?: StringNullableListFilter<"Disaster">
     ownerId?: StringFilter<"Disaster"> | string
     createdAt?: DateTimeFilter<"Disaster"> | Date | string
-    auditTrail?: JsonFilter<"Disaster">
+    auditTrail?: JsonNullableFilter<"Disaster">
     owner?: XOR<UserScalarRelationFilter, UserWhereInput>
     reports?: ReportListRelationFilter
     resources?: ResourceListRelationFilter
@@ -7207,7 +7348,7 @@ export namespace Prisma {
     tags?: SortOrder
     ownerId?: SortOrder
     createdAt?: SortOrder
-    auditTrail?: SortOrder
+    auditTrail?: SortOrderInput | SortOrder
     _count?: DisasterCountOrderByAggregateInput
     _avg?: DisasterAvgOrderByAggregateInput
     _max?: DisasterMaxOrderByAggregateInput
@@ -7228,7 +7369,7 @@ export namespace Prisma {
     tags?: StringNullableListFilter<"Disaster">
     ownerId?: StringWithAggregatesFilter<"Disaster"> | string
     createdAt?: DateTimeWithAggregatesFilter<"Disaster"> | Date | string
-    auditTrail?: JsonWithAggregatesFilter<"Disaster">
+    auditTrail?: JsonNullableWithAggregatesFilter<"Disaster">
   }
 
   export type ReportWhereInput = {
@@ -7242,6 +7383,7 @@ export namespace Prisma {
     imageUrl?: StringFilter<"Report"> | string
     verificationStatus?: EnumVerificationStatusFilter<"Report"> | $Enums.VerificationStatus
     createdAt?: DateTimeFilter<"Report"> | Date | string
+    metadata?: JsonNullableFilter<"Report">
     disaster?: XOR<DisasterScalarRelationFilter, DisasterWhereInput>
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
   }
@@ -7254,6 +7396,7 @@ export namespace Prisma {
     imageUrl?: SortOrder
     verificationStatus?: SortOrder
     createdAt?: SortOrder
+    metadata?: SortOrderInput | SortOrder
     disaster?: DisasterOrderByWithRelationInput
     user?: UserOrderByWithRelationInput
   }
@@ -7269,6 +7412,7 @@ export namespace Prisma {
     imageUrl?: StringFilter<"Report"> | string
     verificationStatus?: EnumVerificationStatusFilter<"Report"> | $Enums.VerificationStatus
     createdAt?: DateTimeFilter<"Report"> | Date | string
+    metadata?: JsonNullableFilter<"Report">
     disaster?: XOR<DisasterScalarRelationFilter, DisasterWhereInput>
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
   }, "id">
@@ -7281,6 +7425,7 @@ export namespace Prisma {
     imageUrl?: SortOrder
     verificationStatus?: SortOrder
     createdAt?: SortOrder
+    metadata?: SortOrderInput | SortOrder
     _count?: ReportCountOrderByAggregateInput
     _max?: ReportMaxOrderByAggregateInput
     _min?: ReportMinOrderByAggregateInput
@@ -7297,6 +7442,7 @@ export namespace Prisma {
     imageUrl?: StringWithAggregatesFilter<"Report"> | string
     verificationStatus?: EnumVerificationStatusWithAggregatesFilter<"Report"> | $Enums.VerificationStatus
     createdAt?: DateTimeWithAggregatesFilter<"Report"> | Date | string
+    metadata?: JsonNullableWithAggregatesFilter<"Report">
   }
 
   export type ResourceWhereInput = {
@@ -7377,13 +7523,25 @@ export namespace Prisma {
     NOT?: CacheWhereInput | CacheWhereInput[]
     key?: StringFilter<"Cache"> | string
     value?: JsonFilter<"Cache">
-    expiresAt?: DateTimeFilter<"Cache"> | Date | string
+    expires_at?: DateTimeFilter<"Cache"> | Date | string
+    created_at?: DateTimeFilter<"Cache"> | Date | string
+    updated_at?: DateTimeFilter<"Cache"> | Date | string
+    access_count?: IntFilter<"Cache"> | number
+    last_accessed?: DateTimeNullableFilter<"Cache"> | Date | string | null
+    tags?: StringNullableListFilter<"Cache">
+    metadata?: JsonNullableFilter<"Cache">
   }
 
   export type CacheOrderByWithRelationInput = {
     key?: SortOrder
     value?: SortOrder
-    expiresAt?: SortOrder
+    expires_at?: SortOrder
+    created_at?: SortOrder
+    updated_at?: SortOrder
+    access_count?: SortOrder
+    last_accessed?: SortOrderInput | SortOrder
+    tags?: SortOrder
+    metadata?: SortOrderInput | SortOrder
   }
 
   export type CacheWhereUniqueInput = Prisma.AtLeast<{
@@ -7392,16 +7550,30 @@ export namespace Prisma {
     OR?: CacheWhereInput[]
     NOT?: CacheWhereInput | CacheWhereInput[]
     value?: JsonFilter<"Cache">
-    expiresAt?: DateTimeFilter<"Cache"> | Date | string
+    expires_at?: DateTimeFilter<"Cache"> | Date | string
+    created_at?: DateTimeFilter<"Cache"> | Date | string
+    updated_at?: DateTimeFilter<"Cache"> | Date | string
+    access_count?: IntFilter<"Cache"> | number
+    last_accessed?: DateTimeNullableFilter<"Cache"> | Date | string | null
+    tags?: StringNullableListFilter<"Cache">
+    metadata?: JsonNullableFilter<"Cache">
   }, "key">
 
   export type CacheOrderByWithAggregationInput = {
     key?: SortOrder
     value?: SortOrder
-    expiresAt?: SortOrder
+    expires_at?: SortOrder
+    created_at?: SortOrder
+    updated_at?: SortOrder
+    access_count?: SortOrder
+    last_accessed?: SortOrderInput | SortOrder
+    tags?: SortOrder
+    metadata?: SortOrderInput | SortOrder
     _count?: CacheCountOrderByAggregateInput
+    _avg?: CacheAvgOrderByAggregateInput
     _max?: CacheMaxOrderByAggregateInput
     _min?: CacheMinOrderByAggregateInput
+    _sum?: CacheSumOrderByAggregateInput
   }
 
   export type CacheScalarWhereWithAggregatesInput = {
@@ -7410,16 +7582,22 @@ export namespace Prisma {
     NOT?: CacheScalarWhereWithAggregatesInput | CacheScalarWhereWithAggregatesInput[]
     key?: StringWithAggregatesFilter<"Cache"> | string
     value?: JsonWithAggregatesFilter<"Cache">
-    expiresAt?: DateTimeWithAggregatesFilter<"Cache"> | Date | string
+    expires_at?: DateTimeWithAggregatesFilter<"Cache"> | Date | string
+    created_at?: DateTimeWithAggregatesFilter<"Cache"> | Date | string
+    updated_at?: DateTimeWithAggregatesFilter<"Cache"> | Date | string
+    access_count?: IntWithAggregatesFilter<"Cache"> | number
+    last_accessed?: DateTimeNullableWithAggregatesFilter<"Cache"> | Date | string | null
+    tags?: StringNullableListFilter<"Cache">
+    metadata?: JsonNullableWithAggregatesFilter<"Cache">
   }
 
   export type UserCreateInput = {
     id?: string
     username: string
     email: string
-    role?: $Enums.Role | null
+    role?: $Enums.Role
     createdAt?: Date | string
-    password: string
+    password?: string | null
     disasters?: DisasterCreateNestedManyWithoutOwnerInput
     reports?: ReportCreateNestedManyWithoutUserInput
   }
@@ -7428,9 +7606,9 @@ export namespace Prisma {
     id?: string
     username: string
     email: string
-    role?: $Enums.Role | null
+    role?: $Enums.Role
     createdAt?: Date | string
-    password: string
+    password?: string | null
     disasters?: DisasterUncheckedCreateNestedManyWithoutOwnerInput
     reports?: ReportUncheckedCreateNestedManyWithoutUserInput
   }
@@ -7439,9 +7617,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     username?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
-    role?: NullableEnumRoleFieldUpdateOperationsInput | $Enums.Role | null
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    password?: StringFieldUpdateOperationsInput | string
+    password?: NullableStringFieldUpdateOperationsInput | string | null
     disasters?: DisasterUpdateManyWithoutOwnerNestedInput
     reports?: ReportUpdateManyWithoutUserNestedInput
   }
@@ -7450,9 +7628,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     username?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
-    role?: NullableEnumRoleFieldUpdateOperationsInput | $Enums.Role | null
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    password?: StringFieldUpdateOperationsInput | string
+    password?: NullableStringFieldUpdateOperationsInput | string | null
     disasters?: DisasterUncheckedUpdateManyWithoutOwnerNestedInput
     reports?: ReportUncheckedUpdateManyWithoutUserNestedInput
   }
@@ -7461,27 +7639,27 @@ export namespace Prisma {
     id?: string
     username: string
     email: string
-    role?: $Enums.Role | null
+    role?: $Enums.Role
     createdAt?: Date | string
-    password: string
+    password?: string | null
   }
 
   export type UserUpdateManyMutationInput = {
     id?: StringFieldUpdateOperationsInput | string
     username?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
-    role?: NullableEnumRoleFieldUpdateOperationsInput | $Enums.Role | null
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    password?: StringFieldUpdateOperationsInput | string
+    password?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type UserUncheckedUpdateManyInput = {
     id?: StringFieldUpdateOperationsInput | string
     username?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
-    role?: NullableEnumRoleFieldUpdateOperationsInput | $Enums.Role | null
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    password?: StringFieldUpdateOperationsInput | string
+    password?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type DisasterCreateInput = {
@@ -7493,7 +7671,7 @@ export namespace Prisma {
     description: string
     tags?: DisasterCreatetagsInput | string[]
     createdAt?: Date | string
-    auditTrail?: JsonNullValueInput | InputJsonValue
+    auditTrail?: NullableJsonNullValueInput | InputJsonValue
     owner: UserCreateNestedOneWithoutDisastersInput
     reports?: ReportCreateNestedManyWithoutDisasterInput
     resources?: ResourceCreateNestedManyWithoutDisasterInput
@@ -7509,7 +7687,7 @@ export namespace Prisma {
     tags?: DisasterCreatetagsInput | string[]
     ownerId: string
     createdAt?: Date | string
-    auditTrail?: JsonNullValueInput | InputJsonValue
+    auditTrail?: NullableJsonNullValueInput | InputJsonValue
     reports?: ReportUncheckedCreateNestedManyWithoutDisasterInput
     resources?: ResourceUncheckedCreateNestedManyWithoutDisasterInput
   }
@@ -7523,7 +7701,7 @@ export namespace Prisma {
     description?: StringFieldUpdateOperationsInput | string
     tags?: DisasterUpdatetagsInput | string[]
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    auditTrail?: JsonNullValueInput | InputJsonValue
+    auditTrail?: NullableJsonNullValueInput | InputJsonValue
     owner?: UserUpdateOneRequiredWithoutDisastersNestedInput
     reports?: ReportUpdateManyWithoutDisasterNestedInput
     resources?: ResourceUpdateManyWithoutDisasterNestedInput
@@ -7539,7 +7717,7 @@ export namespace Prisma {
     tags?: DisasterUpdatetagsInput | string[]
     ownerId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    auditTrail?: JsonNullValueInput | InputJsonValue
+    auditTrail?: NullableJsonNullValueInput | InputJsonValue
     reports?: ReportUncheckedUpdateManyWithoutDisasterNestedInput
     resources?: ResourceUncheckedUpdateManyWithoutDisasterNestedInput
   }
@@ -7554,7 +7732,7 @@ export namespace Prisma {
     tags?: DisasterCreatetagsInput | string[]
     ownerId: string
     createdAt?: Date | string
-    auditTrail?: JsonNullValueInput | InputJsonValue
+    auditTrail?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type DisasterUpdateManyMutationInput = {
@@ -7566,7 +7744,7 @@ export namespace Prisma {
     description?: StringFieldUpdateOperationsInput | string
     tags?: DisasterUpdatetagsInput | string[]
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    auditTrail?: JsonNullValueInput | InputJsonValue
+    auditTrail?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type DisasterUncheckedUpdateManyInput = {
@@ -7579,7 +7757,7 @@ export namespace Prisma {
     tags?: DisasterUpdatetagsInput | string[]
     ownerId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    auditTrail?: JsonNullValueInput | InputJsonValue
+    auditTrail?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type ReportCreateInput = {
@@ -7588,6 +7766,7 @@ export namespace Prisma {
     imageUrl: string
     verificationStatus?: $Enums.VerificationStatus
     createdAt?: Date | string
+    metadata?: NullableJsonNullValueInput | InputJsonValue
     disaster: DisasterCreateNestedOneWithoutReportsInput
     user: UserCreateNestedOneWithoutReportsInput
   }
@@ -7600,6 +7779,7 @@ export namespace Prisma {
     imageUrl: string
     verificationStatus?: $Enums.VerificationStatus
     createdAt?: Date | string
+    metadata?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type ReportUpdateInput = {
@@ -7608,6 +7788,7 @@ export namespace Prisma {
     imageUrl?: StringFieldUpdateOperationsInput | string
     verificationStatus?: EnumVerificationStatusFieldUpdateOperationsInput | $Enums.VerificationStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    metadata?: NullableJsonNullValueInput | InputJsonValue
     disaster?: DisasterUpdateOneRequiredWithoutReportsNestedInput
     user?: UserUpdateOneRequiredWithoutReportsNestedInput
   }
@@ -7620,6 +7801,7 @@ export namespace Prisma {
     imageUrl?: StringFieldUpdateOperationsInput | string
     verificationStatus?: EnumVerificationStatusFieldUpdateOperationsInput | $Enums.VerificationStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    metadata?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type ReportCreateManyInput = {
@@ -7630,6 +7812,7 @@ export namespace Prisma {
     imageUrl: string
     verificationStatus?: $Enums.VerificationStatus
     createdAt?: Date | string
+    metadata?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type ReportUpdateManyMutationInput = {
@@ -7638,6 +7821,7 @@ export namespace Prisma {
     imageUrl?: StringFieldUpdateOperationsInput | string
     verificationStatus?: EnumVerificationStatusFieldUpdateOperationsInput | $Enums.VerificationStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    metadata?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type ReportUncheckedUpdateManyInput = {
@@ -7648,6 +7832,7 @@ export namespace Prisma {
     imageUrl?: StringFieldUpdateOperationsInput | string
     verificationStatus?: EnumVerificationStatusFieldUpdateOperationsInput | $Enums.VerificationStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    metadata?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type ResourceCreateInput = {
@@ -7729,43 +7914,85 @@ export namespace Prisma {
   export type CacheCreateInput = {
     key: string
     value: JsonNullValueInput | InputJsonValue
-    expiresAt: Date | string
+    expires_at: Date | string
+    created_at?: Date | string
+    updated_at?: Date | string
+    access_count?: number
+    last_accessed?: Date | string | null
+    tags?: CacheCreatetagsInput | string[]
+    metadata?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type CacheUncheckedCreateInput = {
     key: string
     value: JsonNullValueInput | InputJsonValue
-    expiresAt: Date | string
+    expires_at: Date | string
+    created_at?: Date | string
+    updated_at?: Date | string
+    access_count?: number
+    last_accessed?: Date | string | null
+    tags?: CacheCreatetagsInput | string[]
+    metadata?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type CacheUpdateInput = {
     key?: StringFieldUpdateOperationsInput | string
     value?: JsonNullValueInput | InputJsonValue
-    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    expires_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    access_count?: IntFieldUpdateOperationsInput | number
+    last_accessed?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    tags?: CacheUpdatetagsInput | string[]
+    metadata?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type CacheUncheckedUpdateInput = {
     key?: StringFieldUpdateOperationsInput | string
     value?: JsonNullValueInput | InputJsonValue
-    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    expires_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    access_count?: IntFieldUpdateOperationsInput | number
+    last_accessed?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    tags?: CacheUpdatetagsInput | string[]
+    metadata?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type CacheCreateManyInput = {
     key: string
     value: JsonNullValueInput | InputJsonValue
-    expiresAt: Date | string
+    expires_at: Date | string
+    created_at?: Date | string
+    updated_at?: Date | string
+    access_count?: number
+    last_accessed?: Date | string | null
+    tags?: CacheCreatetagsInput | string[]
+    metadata?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type CacheUpdateManyMutationInput = {
     key?: StringFieldUpdateOperationsInput | string
     value?: JsonNullValueInput | InputJsonValue
-    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    expires_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    access_count?: IntFieldUpdateOperationsInput | number
+    last_accessed?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    tags?: CacheUpdatetagsInput | string[]
+    metadata?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type CacheUncheckedUpdateManyInput = {
     key?: StringFieldUpdateOperationsInput | string
     value?: JsonNullValueInput | InputJsonValue
-    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    expires_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    access_count?: IntFieldUpdateOperationsInput | number
+    last_accessed?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    tags?: CacheUpdatetagsInput | string[]
+    metadata?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type StringFilter<$PrismaModel = never> = {
@@ -7783,11 +8010,11 @@ export namespace Prisma {
     not?: NestedStringFilter<$PrismaModel> | string
   }
 
-  export type EnumRoleNullableFilter<$PrismaModel = never> = {
-    equals?: $Enums.Role | EnumRoleFieldRefInput<$PrismaModel> | null
-    in?: $Enums.Role[] | ListEnumRoleFieldRefInput<$PrismaModel> | null
-    notIn?: $Enums.Role[] | ListEnumRoleFieldRefInput<$PrismaModel> | null
-    not?: NestedEnumRoleNullableFilter<$PrismaModel> | $Enums.Role | null
+  export type EnumRoleFilter<$PrismaModel = never> = {
+    equals?: $Enums.Role | EnumRoleFieldRefInput<$PrismaModel>
+    in?: $Enums.Role[] | ListEnumRoleFieldRefInput<$PrismaModel>
+    notIn?: $Enums.Role[] | ListEnumRoleFieldRefInput<$PrismaModel>
+    not?: NestedEnumRoleFilter<$PrismaModel> | $Enums.Role
   }
 
   export type DateTimeFilter<$PrismaModel = never> = {
@@ -7886,14 +8113,14 @@ export namespace Prisma {
     _max?: NestedStringFilter<$PrismaModel>
   }
 
-  export type EnumRoleNullableWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: $Enums.Role | EnumRoleFieldRefInput<$PrismaModel> | null
-    in?: $Enums.Role[] | ListEnumRoleFieldRefInput<$PrismaModel> | null
-    notIn?: $Enums.Role[] | ListEnumRoleFieldRefInput<$PrismaModel> | null
-    not?: NestedEnumRoleNullableWithAggregatesFilter<$PrismaModel> | $Enums.Role | null
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _min?: NestedEnumRoleNullableFilter<$PrismaModel>
-    _max?: NestedEnumRoleNullableFilter<$PrismaModel>
+  export type EnumRoleWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.Role | EnumRoleFieldRefInput<$PrismaModel>
+    in?: $Enums.Role[] | ListEnumRoleFieldRefInput<$PrismaModel>
+    notIn?: $Enums.Role[] | ListEnumRoleFieldRefInput<$PrismaModel>
+    not?: NestedEnumRoleWithAggregatesFilter<$PrismaModel> | $Enums.Role
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumRoleFilter<$PrismaModel>
+    _max?: NestedEnumRoleFilter<$PrismaModel>
   }
 
   export type DateTimeWithAggregatesFilter<$PrismaModel = never> = {
@@ -7946,14 +8173,14 @@ export namespace Prisma {
     hasSome?: string[] | ListStringFieldRefInput<$PrismaModel>
     isEmpty?: boolean
   }
-  export type JsonFilter<$PrismaModel = never> =
+  export type JsonNullableFilter<$PrismaModel = never> =
     | PatchUndefined<
-        Either<Required<JsonFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonFilterBase<$PrismaModel>>, 'path'>>,
-        Required<JsonFilterBase<$PrismaModel>>
+        Either<Required<JsonNullableFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonNullableFilterBase<$PrismaModel>>, 'path'>>,
+        Required<JsonNullableFilterBase<$PrismaModel>>
       >
-    | OptionalFlat<Omit<Required<JsonFilterBase<$PrismaModel>>, 'path'>>
+    | OptionalFlat<Omit<Required<JsonNullableFilterBase<$PrismaModel>>, 'path'>>
 
-  export type JsonFilterBase<$PrismaModel = never> = {
+  export type JsonNullableFilterBase<$PrismaModel = never> = {
     equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
     path?: string[]
     mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
@@ -8045,14 +8272,14 @@ export namespace Prisma {
     _min?: NestedFloatFilter<$PrismaModel>
     _max?: NestedFloatFilter<$PrismaModel>
   }
-  export type JsonWithAggregatesFilter<$PrismaModel = never> =
+  export type JsonNullableWithAggregatesFilter<$PrismaModel = never> =
     | PatchUndefined<
-        Either<Required<JsonWithAggregatesFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonWithAggregatesFilterBase<$PrismaModel>>, 'path'>>,
-        Required<JsonWithAggregatesFilterBase<$PrismaModel>>
+        Either<Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, 'path'>>,
+        Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>
       >
-    | OptionalFlat<Omit<Required<JsonWithAggregatesFilterBase<$PrismaModel>>, 'path'>>
+    | OptionalFlat<Omit<Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, 'path'>>
 
-  export type JsonWithAggregatesFilterBase<$PrismaModel = never> = {
+  export type JsonNullableWithAggregatesFilterBase<$PrismaModel = never> = {
     equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
     path?: string[]
     mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
@@ -8067,9 +8294,9 @@ export namespace Prisma {
     gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
     gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
     not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
-    _count?: NestedIntFilter<$PrismaModel>
-    _min?: NestedJsonFilter<$PrismaModel>
-    _max?: NestedJsonFilter<$PrismaModel>
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedJsonNullableFilter<$PrismaModel>
+    _max?: NestedJsonNullableFilter<$PrismaModel>
   }
 
   export type EnumVerificationStatusFilter<$PrismaModel = never> = {
@@ -8092,6 +8319,7 @@ export namespace Prisma {
     imageUrl?: SortOrder
     verificationStatus?: SortOrder
     createdAt?: SortOrder
+    metadata?: SortOrder
   }
 
   export type ReportMaxOrderByAggregateInput = {
@@ -8166,21 +8394,144 @@ export namespace Prisma {
     latitude?: SortOrder
     longitude?: SortOrder
   }
+  export type JsonFilter<$PrismaModel = never> =
+    | PatchUndefined<
+        Either<Required<JsonFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonFilterBase<$PrismaModel>>, 'path'>>,
+        Required<JsonFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<JsonFilterBase<$PrismaModel>>, 'path'>>
+
+  export type JsonFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string[]
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+  }
+
+  export type IntFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel>
+    in?: number[] | ListIntFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel>
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntFilter<$PrismaModel> | number
+  }
+
+  export type DateTimeNullableFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
+  }
 
   export type CacheCountOrderByAggregateInput = {
     key?: SortOrder
     value?: SortOrder
-    expiresAt?: SortOrder
+    expires_at?: SortOrder
+    created_at?: SortOrder
+    updated_at?: SortOrder
+    access_count?: SortOrder
+    last_accessed?: SortOrder
+    tags?: SortOrder
+    metadata?: SortOrder
+  }
+
+  export type CacheAvgOrderByAggregateInput = {
+    access_count?: SortOrder
   }
 
   export type CacheMaxOrderByAggregateInput = {
     key?: SortOrder
-    expiresAt?: SortOrder
+    expires_at?: SortOrder
+    created_at?: SortOrder
+    updated_at?: SortOrder
+    access_count?: SortOrder
+    last_accessed?: SortOrder
   }
 
   export type CacheMinOrderByAggregateInput = {
     key?: SortOrder
-    expiresAt?: SortOrder
+    expires_at?: SortOrder
+    created_at?: SortOrder
+    updated_at?: SortOrder
+    access_count?: SortOrder
+    last_accessed?: SortOrder
+  }
+
+  export type CacheSumOrderByAggregateInput = {
+    access_count?: SortOrder
+  }
+  export type JsonWithAggregatesFilter<$PrismaModel = never> =
+    | PatchUndefined<
+        Either<Required<JsonWithAggregatesFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonWithAggregatesFilterBase<$PrismaModel>>, 'path'>>,
+        Required<JsonWithAggregatesFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<JsonWithAggregatesFilterBase<$PrismaModel>>, 'path'>>
+
+  export type JsonWithAggregatesFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string[]
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedJsonFilter<$PrismaModel>
+    _max?: NestedJsonFilter<$PrismaModel>
+  }
+
+  export type IntWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel>
+    in?: number[] | ListIntFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel>
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntWithAggregatesFilter<$PrismaModel> | number
+    _count?: NestedIntFilter<$PrismaModel>
+    _avg?: NestedFloatFilter<$PrismaModel>
+    _sum?: NestedIntFilter<$PrismaModel>
+    _min?: NestedIntFilter<$PrismaModel>
+    _max?: NestedIntFilter<$PrismaModel>
+  }
+
+  export type DateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableWithAggregatesFilter<$PrismaModel> | Date | string | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedDateTimeNullableFilter<$PrismaModel>
+    _max?: NestedDateTimeNullableFilter<$PrismaModel>
   }
 
   export type DisasterCreateNestedManyWithoutOwnerInput = {
@@ -8215,8 +8566,8 @@ export namespace Prisma {
     set?: string
   }
 
-  export type NullableEnumRoleFieldUpdateOperationsInput = {
-    set?: $Enums.Role | null
+  export type EnumRoleFieldUpdateOperationsInput = {
+    set?: $Enums.Role
   }
 
   export type DateTimeFieldUpdateOperationsInput = {
@@ -8444,6 +8795,27 @@ export namespace Prisma {
     update?: XOR<XOR<DisasterUpdateToOneWithWhereWithoutResourcesInput, DisasterUpdateWithoutResourcesInput>, DisasterUncheckedUpdateWithoutResourcesInput>
   }
 
+  export type CacheCreatetagsInput = {
+    set: string[]
+  }
+
+  export type IntFieldUpdateOperationsInput = {
+    set?: number
+    increment?: number
+    decrement?: number
+    multiply?: number
+    divide?: number
+  }
+
+  export type NullableDateTimeFieldUpdateOperationsInput = {
+    set?: Date | string | null
+  }
+
+  export type CacheUpdatetagsInput = {
+    set?: string[]
+    push?: string | string[]
+  }
+
   export type NestedStringFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel>
     in?: string[] | ListStringFieldRefInput<$PrismaModel>
@@ -8458,11 +8830,11 @@ export namespace Prisma {
     not?: NestedStringFilter<$PrismaModel> | string
   }
 
-  export type NestedEnumRoleNullableFilter<$PrismaModel = never> = {
-    equals?: $Enums.Role | EnumRoleFieldRefInput<$PrismaModel> | null
-    in?: $Enums.Role[] | ListEnumRoleFieldRefInput<$PrismaModel> | null
-    notIn?: $Enums.Role[] | ListEnumRoleFieldRefInput<$PrismaModel> | null
-    not?: NestedEnumRoleNullableFilter<$PrismaModel> | $Enums.Role | null
+  export type NestedEnumRoleFilter<$PrismaModel = never> = {
+    equals?: $Enums.Role | EnumRoleFieldRefInput<$PrismaModel>
+    in?: $Enums.Role[] | ListEnumRoleFieldRefInput<$PrismaModel>
+    notIn?: $Enums.Role[] | ListEnumRoleFieldRefInput<$PrismaModel>
+    not?: NestedEnumRoleFilter<$PrismaModel> | $Enums.Role
   }
 
   export type NestedDateTimeFilter<$PrismaModel = never> = {
@@ -8518,25 +8890,14 @@ export namespace Prisma {
     not?: NestedIntFilter<$PrismaModel> | number
   }
 
-  export type NestedEnumRoleNullableWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: $Enums.Role | EnumRoleFieldRefInput<$PrismaModel> | null
-    in?: $Enums.Role[] | ListEnumRoleFieldRefInput<$PrismaModel> | null
-    notIn?: $Enums.Role[] | ListEnumRoleFieldRefInput<$PrismaModel> | null
-    not?: NestedEnumRoleNullableWithAggregatesFilter<$PrismaModel> | $Enums.Role | null
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _min?: NestedEnumRoleNullableFilter<$PrismaModel>
-    _max?: NestedEnumRoleNullableFilter<$PrismaModel>
-  }
-
-  export type NestedIntNullableFilter<$PrismaModel = never> = {
-    equals?: number | IntFieldRefInput<$PrismaModel> | null
-    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
-    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
-    lt?: number | IntFieldRefInput<$PrismaModel>
-    lte?: number | IntFieldRefInput<$PrismaModel>
-    gt?: number | IntFieldRefInput<$PrismaModel>
-    gte?: number | IntFieldRefInput<$PrismaModel>
-    not?: NestedIntNullableFilter<$PrismaModel> | number | null
+  export type NestedEnumRoleWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.Role | EnumRoleFieldRefInput<$PrismaModel>
+    in?: $Enums.Role[] | ListEnumRoleFieldRefInput<$PrismaModel>
+    notIn?: $Enums.Role[] | ListEnumRoleFieldRefInput<$PrismaModel>
+    not?: NestedEnumRoleWithAggregatesFilter<$PrismaModel> | $Enums.Role
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumRoleFilter<$PrismaModel>
+    _max?: NestedEnumRoleFilter<$PrismaModel>
   }
 
   export type NestedDateTimeWithAggregatesFilter<$PrismaModel = never> = {
@@ -8570,6 +8931,17 @@ export namespace Prisma {
     _max?: NestedStringNullableFilter<$PrismaModel>
   }
 
+  export type NestedIntNullableFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntNullableFilter<$PrismaModel> | number | null
+  }
+
   export type NestedFloatFilter<$PrismaModel = never> = {
     equals?: number | FloatFieldRefInput<$PrismaModel>
     in?: number[] | ListFloatFieldRefInput<$PrismaModel>
@@ -8596,14 +8968,14 @@ export namespace Prisma {
     _min?: NestedFloatFilter<$PrismaModel>
     _max?: NestedFloatFilter<$PrismaModel>
   }
-  export type NestedJsonFilter<$PrismaModel = never> =
+  export type NestedJsonNullableFilter<$PrismaModel = never> =
     | PatchUndefined<
-        Either<Required<NestedJsonFilterBase<$PrismaModel>>, Exclude<keyof Required<NestedJsonFilterBase<$PrismaModel>>, 'path'>>,
-        Required<NestedJsonFilterBase<$PrismaModel>>
+        Either<Required<NestedJsonNullableFilterBase<$PrismaModel>>, Exclude<keyof Required<NestedJsonNullableFilterBase<$PrismaModel>>, 'path'>>,
+        Required<NestedJsonNullableFilterBase<$PrismaModel>>
       >
-    | OptionalFlat<Omit<Required<NestedJsonFilterBase<$PrismaModel>>, 'path'>>
+    | OptionalFlat<Omit<Required<NestedJsonNullableFilterBase<$PrismaModel>>, 'path'>>
 
-  export type NestedJsonFilterBase<$PrismaModel = never> = {
+  export type NestedJsonNullableFilterBase<$PrismaModel = never> = {
     equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
     path?: string[]
     mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
@@ -8637,6 +9009,70 @@ export namespace Prisma {
     _max?: NestedEnumVerificationStatusFilter<$PrismaModel>
   }
 
+  export type NestedDateTimeNullableFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
+  }
+  export type NestedJsonFilter<$PrismaModel = never> =
+    | PatchUndefined<
+        Either<Required<NestedJsonFilterBase<$PrismaModel>>, Exclude<keyof Required<NestedJsonFilterBase<$PrismaModel>>, 'path'>>,
+        Required<NestedJsonFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<NestedJsonFilterBase<$PrismaModel>>, 'path'>>
+
+  export type NestedJsonFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string[]
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+  }
+
+  export type NestedIntWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel>
+    in?: number[] | ListIntFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel>
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntWithAggregatesFilter<$PrismaModel> | number
+    _count?: NestedIntFilter<$PrismaModel>
+    _avg?: NestedFloatFilter<$PrismaModel>
+    _sum?: NestedIntFilter<$PrismaModel>
+    _min?: NestedIntFilter<$PrismaModel>
+    _max?: NestedIntFilter<$PrismaModel>
+  }
+
+  export type NestedDateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableWithAggregatesFilter<$PrismaModel> | Date | string | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedDateTimeNullableFilter<$PrismaModel>
+    _max?: NestedDateTimeNullableFilter<$PrismaModel>
+  }
+
   export type DisasterCreateWithoutOwnerInput = {
     id?: string
     title: string
@@ -8646,7 +9082,7 @@ export namespace Prisma {
     description: string
     tags?: DisasterCreatetagsInput | string[]
     createdAt?: Date | string
-    auditTrail?: JsonNullValueInput | InputJsonValue
+    auditTrail?: NullableJsonNullValueInput | InputJsonValue
     reports?: ReportCreateNestedManyWithoutDisasterInput
     resources?: ResourceCreateNestedManyWithoutDisasterInput
   }
@@ -8660,7 +9096,7 @@ export namespace Prisma {
     description: string
     tags?: DisasterCreatetagsInput | string[]
     createdAt?: Date | string
-    auditTrail?: JsonNullValueInput | InputJsonValue
+    auditTrail?: NullableJsonNullValueInput | InputJsonValue
     reports?: ReportUncheckedCreateNestedManyWithoutDisasterInput
     resources?: ResourceUncheckedCreateNestedManyWithoutDisasterInput
   }
@@ -8681,6 +9117,7 @@ export namespace Prisma {
     imageUrl: string
     verificationStatus?: $Enums.VerificationStatus
     createdAt?: Date | string
+    metadata?: NullableJsonNullValueInput | InputJsonValue
     disaster: DisasterCreateNestedOneWithoutReportsInput
   }
 
@@ -8691,6 +9128,7 @@ export namespace Prisma {
     imageUrl: string
     verificationStatus?: $Enums.VerificationStatus
     createdAt?: Date | string
+    metadata?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type ReportCreateOrConnectWithoutUserInput = {
@@ -8732,7 +9170,7 @@ export namespace Prisma {
     tags?: StringNullableListFilter<"Disaster">
     ownerId?: StringFilter<"Disaster"> | string
     createdAt?: DateTimeFilter<"Disaster"> | Date | string
-    auditTrail?: JsonFilter<"Disaster">
+    auditTrail?: JsonNullableFilter<"Disaster">
   }
 
   export type ReportUpsertWithWhereUniqueWithoutUserInput = {
@@ -8762,15 +9200,16 @@ export namespace Prisma {
     imageUrl?: StringFilter<"Report"> | string
     verificationStatus?: EnumVerificationStatusFilter<"Report"> | $Enums.VerificationStatus
     createdAt?: DateTimeFilter<"Report"> | Date | string
+    metadata?: JsonNullableFilter<"Report">
   }
 
   export type UserCreateWithoutDisastersInput = {
     id?: string
     username: string
     email: string
-    role?: $Enums.Role | null
+    role?: $Enums.Role
     createdAt?: Date | string
-    password: string
+    password?: string | null
     reports?: ReportCreateNestedManyWithoutUserInput
   }
 
@@ -8778,9 +9217,9 @@ export namespace Prisma {
     id?: string
     username: string
     email: string
-    role?: $Enums.Role | null
+    role?: $Enums.Role
     createdAt?: Date | string
-    password: string
+    password?: string | null
     reports?: ReportUncheckedCreateNestedManyWithoutUserInput
   }
 
@@ -8795,6 +9234,7 @@ export namespace Prisma {
     imageUrl: string
     verificationStatus?: $Enums.VerificationStatus
     createdAt?: Date | string
+    metadata?: NullableJsonNullValueInput | InputJsonValue
     user: UserCreateNestedOneWithoutReportsInput
   }
 
@@ -8805,6 +9245,7 @@ export namespace Prisma {
     imageUrl: string
     verificationStatus?: $Enums.VerificationStatus
     createdAt?: Date | string
+    metadata?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type ReportCreateOrConnectWithoutDisasterInput = {
@@ -8862,9 +9303,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     username?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
-    role?: NullableEnumRoleFieldUpdateOperationsInput | $Enums.Role | null
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    password?: StringFieldUpdateOperationsInput | string
+    password?: NullableStringFieldUpdateOperationsInput | string | null
     reports?: ReportUpdateManyWithoutUserNestedInput
   }
 
@@ -8872,9 +9313,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     username?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
-    role?: NullableEnumRoleFieldUpdateOperationsInput | $Enums.Role | null
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    password?: StringFieldUpdateOperationsInput | string
+    password?: NullableStringFieldUpdateOperationsInput | string | null
     reports?: ReportUncheckedUpdateManyWithoutUserNestedInput
   }
 
@@ -8933,7 +9374,7 @@ export namespace Prisma {
     description: string
     tags?: DisasterCreatetagsInput | string[]
     createdAt?: Date | string
-    auditTrail?: JsonNullValueInput | InputJsonValue
+    auditTrail?: NullableJsonNullValueInput | InputJsonValue
     owner: UserCreateNestedOneWithoutDisastersInput
     resources?: ResourceCreateNestedManyWithoutDisasterInput
   }
@@ -8948,7 +9389,7 @@ export namespace Prisma {
     tags?: DisasterCreatetagsInput | string[]
     ownerId: string
     createdAt?: Date | string
-    auditTrail?: JsonNullValueInput | InputJsonValue
+    auditTrail?: NullableJsonNullValueInput | InputJsonValue
     resources?: ResourceUncheckedCreateNestedManyWithoutDisasterInput
   }
 
@@ -8961,9 +9402,9 @@ export namespace Prisma {
     id?: string
     username: string
     email: string
-    role?: $Enums.Role | null
+    role?: $Enums.Role
     createdAt?: Date | string
-    password: string
+    password?: string | null
     disasters?: DisasterCreateNestedManyWithoutOwnerInput
   }
 
@@ -8971,9 +9412,9 @@ export namespace Prisma {
     id?: string
     username: string
     email: string
-    role?: $Enums.Role | null
+    role?: $Enums.Role
     createdAt?: Date | string
-    password: string
+    password?: string | null
     disasters?: DisasterUncheckedCreateNestedManyWithoutOwnerInput
   }
 
@@ -9002,7 +9443,7 @@ export namespace Prisma {
     description?: StringFieldUpdateOperationsInput | string
     tags?: DisasterUpdatetagsInput | string[]
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    auditTrail?: JsonNullValueInput | InputJsonValue
+    auditTrail?: NullableJsonNullValueInput | InputJsonValue
     owner?: UserUpdateOneRequiredWithoutDisastersNestedInput
     resources?: ResourceUpdateManyWithoutDisasterNestedInput
   }
@@ -9017,7 +9458,7 @@ export namespace Prisma {
     tags?: DisasterUpdatetagsInput | string[]
     ownerId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    auditTrail?: JsonNullValueInput | InputJsonValue
+    auditTrail?: NullableJsonNullValueInput | InputJsonValue
     resources?: ResourceUncheckedUpdateManyWithoutDisasterNestedInput
   }
 
@@ -9036,9 +9477,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     username?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
-    role?: NullableEnumRoleFieldUpdateOperationsInput | $Enums.Role | null
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    password?: StringFieldUpdateOperationsInput | string
+    password?: NullableStringFieldUpdateOperationsInput | string | null
     disasters?: DisasterUpdateManyWithoutOwnerNestedInput
   }
 
@@ -9046,9 +9487,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     username?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
-    role?: NullableEnumRoleFieldUpdateOperationsInput | $Enums.Role | null
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    password?: StringFieldUpdateOperationsInput | string
+    password?: NullableStringFieldUpdateOperationsInput | string | null
     disasters?: DisasterUncheckedUpdateManyWithoutOwnerNestedInput
   }
 
@@ -9061,7 +9502,7 @@ export namespace Prisma {
     description: string
     tags?: DisasterCreatetagsInput | string[]
     createdAt?: Date | string
-    auditTrail?: JsonNullValueInput | InputJsonValue
+    auditTrail?: NullableJsonNullValueInput | InputJsonValue
     owner: UserCreateNestedOneWithoutDisastersInput
     reports?: ReportCreateNestedManyWithoutDisasterInput
   }
@@ -9076,7 +9517,7 @@ export namespace Prisma {
     tags?: DisasterCreatetagsInput | string[]
     ownerId: string
     createdAt?: Date | string
-    auditTrail?: JsonNullValueInput | InputJsonValue
+    auditTrail?: NullableJsonNullValueInput | InputJsonValue
     reports?: ReportUncheckedCreateNestedManyWithoutDisasterInput
   }
 
@@ -9105,7 +9546,7 @@ export namespace Prisma {
     description?: StringFieldUpdateOperationsInput | string
     tags?: DisasterUpdatetagsInput | string[]
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    auditTrail?: JsonNullValueInput | InputJsonValue
+    auditTrail?: NullableJsonNullValueInput | InputJsonValue
     owner?: UserUpdateOneRequiredWithoutDisastersNestedInput
     reports?: ReportUpdateManyWithoutDisasterNestedInput
   }
@@ -9120,7 +9561,7 @@ export namespace Prisma {
     tags?: DisasterUpdatetagsInput | string[]
     ownerId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    auditTrail?: JsonNullValueInput | InputJsonValue
+    auditTrail?: NullableJsonNullValueInput | InputJsonValue
     reports?: ReportUncheckedUpdateManyWithoutDisasterNestedInput
   }
 
@@ -9133,7 +9574,7 @@ export namespace Prisma {
     description: string
     tags?: DisasterCreatetagsInput | string[]
     createdAt?: Date | string
-    auditTrail?: JsonNullValueInput | InputJsonValue
+    auditTrail?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type ReportCreateManyUserInput = {
@@ -9143,6 +9584,7 @@ export namespace Prisma {
     imageUrl: string
     verificationStatus?: $Enums.VerificationStatus
     createdAt?: Date | string
+    metadata?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type DisasterUpdateWithoutOwnerInput = {
@@ -9154,7 +9596,7 @@ export namespace Prisma {
     description?: StringFieldUpdateOperationsInput | string
     tags?: DisasterUpdatetagsInput | string[]
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    auditTrail?: JsonNullValueInput | InputJsonValue
+    auditTrail?: NullableJsonNullValueInput | InputJsonValue
     reports?: ReportUpdateManyWithoutDisasterNestedInput
     resources?: ResourceUpdateManyWithoutDisasterNestedInput
   }
@@ -9168,7 +9610,7 @@ export namespace Prisma {
     description?: StringFieldUpdateOperationsInput | string
     tags?: DisasterUpdatetagsInput | string[]
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    auditTrail?: JsonNullValueInput | InputJsonValue
+    auditTrail?: NullableJsonNullValueInput | InputJsonValue
     reports?: ReportUncheckedUpdateManyWithoutDisasterNestedInput
     resources?: ResourceUncheckedUpdateManyWithoutDisasterNestedInput
   }
@@ -9182,7 +9624,7 @@ export namespace Prisma {
     description?: StringFieldUpdateOperationsInput | string
     tags?: DisasterUpdatetagsInput | string[]
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    auditTrail?: JsonNullValueInput | InputJsonValue
+    auditTrail?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type ReportUpdateWithoutUserInput = {
@@ -9191,6 +9633,7 @@ export namespace Prisma {
     imageUrl?: StringFieldUpdateOperationsInput | string
     verificationStatus?: EnumVerificationStatusFieldUpdateOperationsInput | $Enums.VerificationStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    metadata?: NullableJsonNullValueInput | InputJsonValue
     disaster?: DisasterUpdateOneRequiredWithoutReportsNestedInput
   }
 
@@ -9201,6 +9644,7 @@ export namespace Prisma {
     imageUrl?: StringFieldUpdateOperationsInput | string
     verificationStatus?: EnumVerificationStatusFieldUpdateOperationsInput | $Enums.VerificationStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    metadata?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type ReportUncheckedUpdateManyWithoutUserInput = {
@@ -9210,6 +9654,7 @@ export namespace Prisma {
     imageUrl?: StringFieldUpdateOperationsInput | string
     verificationStatus?: EnumVerificationStatusFieldUpdateOperationsInput | $Enums.VerificationStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    metadata?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type ReportCreateManyDisasterInput = {
@@ -9219,6 +9664,7 @@ export namespace Prisma {
     imageUrl: string
     verificationStatus?: $Enums.VerificationStatus
     createdAt?: Date | string
+    metadata?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type ResourceCreateManyDisasterInput = {
@@ -9237,6 +9683,7 @@ export namespace Prisma {
     imageUrl?: StringFieldUpdateOperationsInput | string
     verificationStatus?: EnumVerificationStatusFieldUpdateOperationsInput | $Enums.VerificationStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    metadata?: NullableJsonNullValueInput | InputJsonValue
     user?: UserUpdateOneRequiredWithoutReportsNestedInput
   }
 
@@ -9247,6 +9694,7 @@ export namespace Prisma {
     imageUrl?: StringFieldUpdateOperationsInput | string
     verificationStatus?: EnumVerificationStatusFieldUpdateOperationsInput | $Enums.VerificationStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    metadata?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type ReportUncheckedUpdateManyWithoutDisasterInput = {
@@ -9256,6 +9704,7 @@ export namespace Prisma {
     imageUrl?: StringFieldUpdateOperationsInput | string
     verificationStatus?: EnumVerificationStatusFieldUpdateOperationsInput | $Enums.VerificationStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    metadata?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type ResourceUpdateWithoutDisasterInput = {

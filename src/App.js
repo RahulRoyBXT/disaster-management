@@ -2,13 +2,13 @@ import compression from 'compression';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import express from 'express';
+import errorHandler from './middleware/errorHandler.js';
+import notFoundHandler from './middleware/notFoundHandler.js';
+import cacheRoutes from './routes/cache.js';
 import disasterRoutes from './routes/disasters.routes.js';
 import reportRoutes from './routes/report.routes.js';
 import resourceRoute from './routes/resources.routes.js';
 import userRoute from './routes/users.route.js';
-import { logger } from './utils/logger.js';
-import errorHandler from './middleware/errorHandler.js';
-import notFoundHandler from './middleware/notFoundHandler.js';
 
 // import helmet from 'helmet';
 // import morgan from 'morgan';
@@ -44,7 +44,7 @@ const app = express();
 // CORS configuration
 app.use(
   cors({
-    origin: process.env.CORS_ORIGIN,
+    origin: 'http://127.0.0.1:5500' || process.env.CORS_ORIGIN,
     credentials: true,
     optionsSuccessStatus: 200,
   })
@@ -99,7 +99,15 @@ app.use('/api/v1/disasters', disasterRoutes);
 // Resources route
 app.use('/api/v1/resources', resourceRoute);
 
+// Reports route
 app.use('/api/v1/reports', reportRoutes);
+
+// Cache routes
+app.use('/api/v1/cache', cacheRoutes);
+
+// Health check routes
+import healthRoutes from './routes/health.js';
+app.use('/api/v1/health', healthRoutes);
 
 // Root endpoint
 app.get('/', (req, res) => {
@@ -122,29 +130,6 @@ app.get('/', (req, res) => {
 app.use(notFoundHandler);
 app.use(errorHandler);
 
-// Start server
-const PORT = process.env.PORT || 3000;
-const server = app.listen(PORT, () => {
-  logger.info(`🚀 Disaster Management Server running on port ${PORT}`);
-  logger.info(`🌐 Environment: ${process.env.NODE_ENV || 'development'}`);
-  logger.info(`📊 Health check: http://localhost:${PORT}/api/health`);
-});
-
-// Graceful shutdown handling
-process.on('SIGTERM', () => {
-  logger.info('SIGTERM received, shutting down gracefully');
-  server.close(() => {
-    logger.info('Process terminated');
-    process.exit(0);
-  });
-});
-
-process.on('SIGINT', () => {
-  logger.info('SIGINT received, shutting down gracefully');
-  server.close(() => {
-    logger.info('Process terminated');
-    process.exit(0);
-  });
-});
-
+// Export the app without starting it here
+// The server will be started in server.js with Socket.IO integration
 export default app;

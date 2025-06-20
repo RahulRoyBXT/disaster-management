@@ -63,6 +63,7 @@ model Report {
   imageUrl           String
   verificationStatus VerificationStatus @default(PENDING)
   createdAt          DateTime   @default(now())
+  metadata           Json?      @default("{}")
 }
 
 enum VerificationStatus {
@@ -92,9 +93,12 @@ model Cache {
   access_count  Int      @default(1) @map("accessCount")
   last_accessed DateTime? @map("lastAccessed")
   tags          String[] @default([])
+  metadata      Json?    @default("{}")
 
   @@index([expires_at])
   @@index([tags])
+  @@index([access_count(sort: Desc)])
+  @@index([created_at(sort: Desc)])
   @@map("cache")
 }
 

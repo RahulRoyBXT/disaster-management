@@ -1,460 +1,495 @@
 import express from 'express';
-import Joi from 'joi';
-import { cacheModel } from '../models/index.js';
+import { z } from 'zod';
+import { validateRequest } from '../middleware/validation.middleware.js';
+import { verifyJWT } from '../middleware/verifyToken.middleware.js';
+import cacheMonitorService from '../services/cacheMonitorService.js';
+import cacheService from '../services/cacheService.js';
+import cacheTestingService from '../services/cacheTestingService.js';
+import { ApiResponse } from '../utils/ApiResponse.js';
+import { asyncHandler } from '../utils/asyncHandler.js';
 import { logger } from '../utils/logger.js';
 
 const router = express.Router();
 
+// Apply auth middleware for admin routes
+router.use('/admin', verifyJWT);
+
 // Validation schemas
-const setCacheSchema = Joi.object({
-  key: Joi.string().required().min(1).max(255),
-  value: Joi.any().required(),
-  ttl: Joi.number().integer().min(1).max(86400).default(3600), // 1 second to 24 hours
+const setCacheSchema = z.object({
+  key: z.string().min(1).max(255),
+  value: z.any(),
+  ttl: z.number().int().min(1).max(86400).default(3600), // 1 second to 24 hours
 });
 
-const getCacheSchema = Joi.object({
-  keys: Joi.alternatives().try(Joi.string(), Joi.array().items(Joi.string())).optional(),
+const getCacheSchema = z.object({
+  keys: z.union([z.string(), z.array(z.string())]).optional(),
 });
 
-const deleteCacheSchema = Joi.object({
-  keys: Joi.alternatives().try(
-    Joi.string().required(),
-    Joi.array().items(Joi.string()).required().min(1)
-  ),
+const deleteCacheSchema = z.object({
+  keys: z.union([z.string(), z.array(z.string()).min(1)]),
+});
+
+const ttlTestSchema = z.object({
+  ttl: z.number().int().min(5).max(60).default(10),
 });
 
 /**
  * GET /api/cache
  * Get cache statistics or specific cache entries
  */
-router.get('/', async (req, res) => {
-  try {
-    const { keys } = req.query;
+router.get(
+  '/',
+  asyncHandler(async (req, res) => {
+    try {
+      const { keys } = req.query;
 
-    // If no keys specified, return cache statistics
-    if (!keys) {
-      const stats = await cacheModel.getStatistics();
+      // If no keys specified, return cache statistics
+      if (!keys) {
+        const stats = await cacheService.getStats();
 
-      res.json({
-        success: true,
-        data: {
-          statistics: stats,
-          message: 'Use ?keys=key1,key2 to get specific cache entries',
-        },
-      });
-      return;
-    }
-
-    // Handle multiple keys
-    const keyArray = Array.isArray(keys) ? keys : keys.split(',').map(k => k.trim());
-    const results = {};
-
-    for (const key of keyArray) {
-      try {
-        const value = await cacheModel.get(key);
-        results[key] = value;
-      } catch (error) {
-        results[key] = null;
-        logger.warn(`Failed to get cache key ${key}:`, error);
+        return res.status(200).json(
+          new ApiResponse(
+            200,
+            {
+              statistics: stats,
+              message: 'Use ?keys=key1,key2 to get specific cache entries',
+            },
+            'Cache statistics retrieved'
+          )
+        );
       }
-    }
 
-    res.json({
-      success: true,
-      data: results,
-    });
-  } catch (error) {
-    logger.error('Error fetching cache:', error);
-    res.status(500).json({
-      success: false,
-      error: 'Failed to fetch cache data',
-    });
-  }
-});
+      // Handle multiple keys
+      const keyArray = Array.isArray(keys) ? keys : keys.split(',').map(k => k.trim());
+      const results = {};
+
+      for (const key of keyArray) {
+        try {
+          const value = await cacheService.get(key);
+          results[key] = value;
+        } catch (error) {
+          results[key] = null;
+          logger.warn(`Failed to get cache key ${key}:`, error);
+        }
+      }
+
+      return res.status(200).json(new ApiResponse(200, results, 'Cache entries retrieved'));
+    } catch (error) {
+      logger.error('Error fetching cache:', error);
+      return res.status(500).json(new ApiResponse(500, null, 'Failed to fetch cache data'));
+    }
+  })
+);
 
 /**
  * GET /api/cache/:key
  * Get a specific cache entry by key
  */
-router.get('/:key', async (req, res) => {
-  try {
-    const { key } = req.params;
-    const value = await cacheModel.get(key);
+router.get(
+  '/:key',
+  asyncHandler(async (req, res) => {
+    try {
+      const { key } = req.params;
+      const value = await cacheService.get(key);
 
-    if (value === null) {
-      return res.status(404).json({
-        success: false,
-        error: 'Cache key not found or expired',
-      });
+      if (value === null) {
+        return res.status(404).json(new ApiResponse(404, null, 'Cache key not found or expired'));
+      }
+
+      return res.status(200).json(
+        new ApiResponse(
+          200,
+          {
+            key,
+            value,
+            retrieved_at: new Date().toISOString(),
+          },
+          'Cache entry retrieved'
+        )
+      );
+    } catch (error) {
+      logger.error('Error fetching cache key:', error);
+      return res.status(500).json(new ApiResponse(500, null, 'Failed to fetch cache entry'));
     }
-
-    res.json({
-      success: true,
-      data: {
-        key,
-        value,
-        retrieved_at: new Date().toISOString(),
-      },
-    });
-  } catch (error) {
-    logger.error('Error fetching cache key:', error);
-    res.status(500).json({
-      success: false,
-      error: 'Failed to fetch cache key',
-    });
-  }
-});
+  })
+);
 
 /**
  * POST /api/cache
  * Set cache entries
  */
-router.post('/', async (req, res) => {
-  try {
-    // Handle both single entry and batch operations
-    if (Array.isArray(req.body)) {
-      // Batch operation
-      const entries = req.body;
-      const results = [];
+router.post(
+  '/',
+  validateRequest(setCacheSchema),
+  asyncHandler(async (req, res) => {
+    try {
+      // Handle both single entry and batch operations
+      if (Array.isArray(req.body)) {
+        // Batch operation
+        const entries = req.body;
+        const results = [];
 
-      for (const entry of entries) {
-        const { error, value } = setCacheSchema.validate(entry);
-        if (error) {
-          results.push({
-            key: entry.key || 'unknown',
-            success: false,
-            error: error.details[0].message,
-          });
-          continue;
+        for (const entry of entries) {
+          try {
+            const success = await cacheService.set(entry.key, entry.value, entry.ttl);
+            results.push({
+              key: entry.key,
+              success: success,
+            });
+          } catch (error) {
+            results.push({
+              key: entry.key,
+              success: false,
+              error: error.message,
+            });
+          }
         }
 
-        try {
-          const success = await cacheModel.set(value.key, value.value, value.ttl);
-          results.push({
-            key: value.key,
-            success,
-            ttl: value.ttl,
-          });
-        } catch (err) {
-          results.push({
-            key: value.key,
-            success: false,
-            error: err.message,
-          });
-        }
-      }
-
-      res.json({
-        success: true,
-        data: results,
-        message: 'Batch cache operation completed',
-      });
-    } else {
-      // Single entry
-      const { error, value } = setCacheSchema.validate(req.body);
-      if (error) {
-        return res.status(400).json({
-          success: false,
-          error: error.details[0].message,
-        });
-      }
-
-      const { key, value: cacheValue, ttl } = value;
-      const success = await cacheModel.set(key, cacheValue, ttl);
-
-      if (success) {
-        logger.info(`Cache set: ${key} (TTL: ${ttl}s)`);
-        res.status(201).json({
-          success: true,
-          data: {
-            key,
-            ttl,
-            expires_at: new Date(Date.now() + ttl * 1000).toISOString(),
-          },
-          message: 'Cache entry created successfully',
-        });
+        return res
+          .status(200)
+          .json(new ApiResponse(200, { results }, 'Batch cache operation completed'));
       } else {
-        res.status(500).json({
-          success: false,
-          error: 'Failed to set cache entry',
-        });
+        // Single entry
+        const { key, value, ttl } = req.body;
+        const success = await cacheService.set(key, value, ttl);
+
+        if (!success) {
+          return res.status(500).json(new ApiResponse(500, null, 'Failed to set cache entry'));
+        }
+
+        return res.status(200).json(
+          new ApiResponse(
+            200,
+            {
+              key,
+              ttl,
+              expires_at: new Date(Date.now() + ttl * 1000).toISOString(),
+            },
+            'Cache entry set successfully'
+          )
+        );
       }
+    } catch (error) {
+      logger.error('Error setting cache:', error);
+      return res.status(500).json(new ApiResponse(500, null, 'Failed to set cache entry'));
     }
-  } catch (error) {
-    logger.error('Error setting cache:', error);
-    res.status(500).json({
-      success: false,
-      error: 'Failed to set cache data',
-    });
-  }
-});
-
-/**
- * PUT /api/cache/:key
- * Update or create a specific cache entry
- */
-router.put('/:key', async (req, res) => {
-  try {
-    const schema = Joi.object({
-      value: Joi.any().required(),
-      ttl: Joi.number().integer().min(1).max(86400).default(3600),
-    });
-
-    const { error, value } = schema.validate(req.body);
-    if (error) {
-      return res.status(400).json({
-        success: false,
-        error: error.details[0].message,
-      });
-    }
-
-    const { key } = req.params;
-    const { value: cacheValue, ttl } = value;
-
-    const success = await cacheModel.set(key, cacheValue, ttl);
-
-    if (success) {
-      logger.info(`Cache updated: ${key} (TTL: ${ttl}s)`);
-      res.json({
-        success: true,
-        data: {
-          key,
-          ttl,
-          expires_at: new Date(Date.now() + ttl * 1000).toISOString(),
-        },
-        message: 'Cache entry updated successfully',
-      });
-    } else {
-      res.status(500).json({
-        success: false,
-        error: 'Failed to update cache entry',
-      });
-    }
-  } catch (error) {
-    logger.error('Error updating cache:', error);
-    res.status(500).json({
-      success: false,
-      error: 'Failed to update cache data',
-    });
-  }
-});
-
-/**
- * DELETE /api/cache
- * Delete cache entries
- */
-router.delete('/', async (req, res) => {
-  try {
-    const { error, value } = deleteCacheSchema.validate(req.body);
-    if (error) {
-      return res.status(400).json({
-        success: false,
-        error: error.details[0].message,
-      });
-    }
-
-    const { keys } = value;
-    const success = await cacheModel.delete(keys);
-
-    if (success) {
-      const keyArray = Array.isArray(keys) ? keys : [keys];
-      logger.info(`Cache deleted: ${keyArray.join(', ')}`);
-
-      res.json({
-        success: true,
-        data: {
-          deleted_keys: keyArray,
-          count: keyArray.length,
-        },
-        message: 'Cache entries deleted successfully',
-      });
-    } else {
-      res.status(500).json({
-        success: false,
-        error: 'Failed to delete cache entries',
-      });
-    }
-  } catch (error) {
-    logger.error('Error deleting cache:', error);
-    res.status(500).json({
-      success: false,
-      error: 'Failed to delete cache data',
-    });
-  }
-});
+  })
+);
 
 /**
  * DELETE /api/cache/:key
  * Delete a specific cache entry
  */
-router.delete('/:key', async (req, res) => {
-  try {
-    const { key } = req.params;
-    const success = await cacheModel.delete(key);
+router.delete(
+  '/:key',
+  asyncHandler(async (req, res) => {
+    try {
+      const { key } = req.params;
+      const success = await cacheService.delete(key);
 
-    if (success) {
-      logger.info(`Cache deleted: ${key}`);
-      res.json({
-        success: true,
-        data: {
-          deleted_key: key,
-        },
-        message: 'Cache entry deleted successfully',
-      });
-    } else {
-      res.status(500).json({
-        success: false,
-        error: 'Failed to delete cache entry',
-      });
+      if (!success) {
+        return res
+          .status(404)
+          .json(new ApiResponse(404, null, 'Cache key not found or already expired'));
+      }
+
+      return res
+        .status(200)
+        .json(new ApiResponse(200, { key }, 'Cache entry deleted successfully'));
+    } catch (error) {
+      logger.error('Error deleting cache key:', error);
+      return res.status(500).json(new ApiResponse(500, null, 'Failed to delete cache entry'));
     }
-  } catch (error) {
-    logger.error('Error deleting cache key:', error);
-    res.status(500).json({
-      success: false,
-      error: 'Failed to delete cache key',
-    });
-  }
-});
+  })
+);
 
 /**
- * POST /api/cache/clear
- * Clear all cache entries
+ * POST /api/cache/admin/clean-expired
+ * Clean all expired cache entries (admin only)
  */
-router.post('/clear', async (req, res) => {
-  try {
-    const success = await cacheModel.clear();
-
-    if (success) {
-      logger.info('All cache cleared');
-      res.json({
-        success: true,
-        message: 'All cache entries cleared successfully',
-      });
-    } else {
-      res.status(500).json({
-        success: false,
-        error: 'Failed to clear cache',
-      });
+router.post(
+  '/admin/clean-expired',
+  asyncHandler(async (req, res) => {
+    try {
+      const count = await cacheService.cleanExpired();
+      return res
+        .status(200)
+        .json(
+          new ApiResponse(200, { deleted_count: count }, `Cleaned ${count} expired cache entries`)
+        );
+    } catch (error) {
+      logger.error('Error cleaning expired cache:', error);
+      return res
+        .status(500)
+        .json(new ApiResponse(500, null, 'Failed to clean expired cache entries'));
     }
-  } catch (error) {
-    logger.error('Error clearing cache:', error);
-    res.status(500).json({
-      success: false,
-      error: 'Failed to clear cache',
-    });
-  }
-});
+  })
+);
 
 /**
- * POST /api/cache/cleanup
- * Clean expired cache entries
+ * POST /api/cache/admin/test-ttl
+ * Test cache TTL by creating a test entry with a short TTL (admin only)
  */
-router.post('/cleanup', async (req, res) => {
-  try {
-    const cleanedCount = await cacheModel.cleanExpired();
+router.post(
+  '/admin/test-ttl',
+  validateRequest(ttlTestSchema),
+  asyncHandler(async (req, res) => {
+    try {
+      const { ttl } = req.body;
+      const testKey = `cache_test_${Date.now()}`;
+      const testValue = {
+        message: 'This is a test cache entry',
+        created_at: new Date().toISOString(),
+        ttl_seconds: ttl,
+      };
 
-    res.json({
-      success: true,
-      data: {
-        cleaned_entries: cleanedCount,
-      },
-      message: `Cleaned ${cleanedCount} expired cache entries`,
-    });
-  } catch (error) {
-    logger.error('Error cleaning cache:', error);
-    res.status(500).json({
-      success: false,
-      error: 'Failed to clean expired cache entries',
-    });
-  }
-});
+      // Set the cache entry with the specified TTL
+      await cacheService.set(testKey, testValue, ttl);
 
-/**
- * GET /api/cache/keys
- * Get cache keys matching a pattern
- */
-router.get('/keys', async (req, res) => {
-  try {
-    const { pattern = '%' } = req.query;
-    const keys = await cacheModel.getKeys(pattern);
-
-    res.json({
-      success: true,
-      data: {
-        keys,
-        count: keys.length,
-        pattern,
-      },
-    });
-  } catch (error) {
-    logger.error('Error fetching cache keys:', error);
-    res.status(500).json({
-      success: false,
-      error: 'Failed to fetch cache keys',
-    });
-  }
-});
-
-/**
- * POST /api/cache/:key/increment
- * Increment a numeric cache value
- */
-router.post('/:key/increment', async (req, res) => {
-  try {
-    const schema = Joi.object({
-      increment: Joi.number().default(1),
-      ttl: Joi.number().integer().min(1).max(86400).default(3600),
-    });
-
-    const { error, value } = schema.validate(req.body);
-    if (error) {
-      return res.status(400).json({
-        success: false,
-        error: error.details[0].message,
-      });
+      return res.status(200).json(
+        new ApiResponse(
+          200,
+          {
+            key: testKey,
+            value: testValue,
+            ttl,
+            expires_at: new Date(Date.now() + ttl * 1000).toISOString(),
+            instructions: `Check this key in ${ttl} seconds to verify it has expired.`,
+          },
+          'TTL test initiated'
+        )
+      );
+    } catch (error) {
+      logger.error('Error testing cache TTL:', error);
+      return res.status(500).json(new ApiResponse(500, null, 'Failed to test cache TTL'));
     }
-
-    const { key } = req.params;
-    const { increment, ttl } = value;
-
-    const newValue = await cacheModel.increment(key, increment, ttl);
-
-    res.json({
-      success: true,
-      data: {
-        key,
-        value: newValue,
-        increment,
-      },
-      message: 'Cache value incremented successfully',
-    });
-  } catch (error) {
-    logger.error('Error incrementing cache value:', error);
-    res.status(500).json({
-      success: false,
-      error: 'Failed to increment cache value',
-    });
-  }
-});
+  })
+);
 
 /**
- * HEAD /api/cache/:key
- * Check if cache key exists
+ * POST /api/cache/admin/monitor/start
+ * Start cache monitoring (admin only)
  */
-router.head('/:key', async (req, res) => {
-  try {
-    const { key } = req.params;
-    const exists = await cacheModel.has(key);
+router.post(
+  '/admin/monitor/start',
+  asyncHandler(async (req, res) => {
+    try {
+      const { interval } = req.body;
+      cacheMonitorService.start(interval);
 
-    if (exists) {
-      res.status(200).end();
-    } else {
-      res.status(404).end();
+      return res.status(200).json(
+        new ApiResponse(
+          200,
+          {
+            monitoring_status: 'active',
+            interval: cacheMonitorService.interval,
+          },
+          'Cache monitoring started'
+        )
+      );
+    } catch (error) {
+      logger.error('Error starting cache monitoring:', error);
+      return res.status(500).json(new ApiResponse(500, null, 'Failed to start cache monitoring'));
     }
-  } catch (error) {
-    logger.error('Error checking cache existence:', error);
-    res.status(500).end();
-  }
-});
+  })
+);
+
+/**
+ * POST /api/cache/admin/monitor/stop
+ * Stop cache monitoring (admin only)
+ */
+router.post(
+  '/admin/monitor/stop',
+  asyncHandler(async (req, res) => {
+    try {
+      cacheMonitorService.stop();
+
+      return res.status(200).json(
+        new ApiResponse(
+          200,
+          {
+            monitoring_status: 'inactive',
+          },
+          'Cache monitoring stopped'
+        )
+      );
+    } catch (error) {
+      logger.error('Error stopping cache monitoring:', error);
+      return res.status(500).json(new ApiResponse(500, null, 'Failed to stop cache monitoring'));
+    }
+  })
+);
+
+/**
+ * GET /api/cache/admin/monitor/status
+ * Get cache monitoring status and data (admin only)
+ */
+router.get(
+  '/admin/monitor/status',
+  asyncHandler(async (req, res) => {
+    try {
+      const options = {
+        includeHistory: req.query.history !== 'false',
+        historyHours: parseInt(req.query.history_hours) || 24,
+        includeCurrentStats: req.query.current_stats !== 'false',
+        includeRealTimeMetrics: req.query.real_time_metrics !== 'false',
+      };
+
+      const monitoringData = await cacheMonitorService.getMonitoringData(options);
+
+      return res
+        .status(200)
+        .json(new ApiResponse(200, monitoringData, 'Cache monitoring data retrieved'));
+    } catch (error) {
+      logger.error('Error getting cache monitoring status:', error);
+      return res
+        .status(500)
+        .json(new ApiResponse(500, null, 'Failed to get cache monitoring status'));
+    }
+  })
+);
+
+/**
+ * GET /api/cache/admin/monitor/recommendations
+ * Get cache optimization recommendations (admin only)
+ */
+router.get(
+  '/admin/monitor/recommendations',
+  asyncHandler(async (req, res) => {
+    try {
+      const recommendations = await cacheMonitorService.generateRecommendations();
+
+      return res
+        .status(200)
+        .json(
+          new ApiResponse(200, { recommendations }, 'Cache optimization recommendations generated')
+        );
+    } catch (error) {
+      logger.error('Error generating cache recommendations:', error);
+      return res
+        .status(500)
+        .json(new ApiResponse(500, null, 'Failed to generate cache recommendations'));
+    }
+  })
+);
+
+/**
+ * POST /api/cache/admin/test/ttl
+ * Run a comprehensive TTL test (admin only)
+ */
+router.post(
+  '/admin/test/ttl',
+  asyncHandler(async (req, res) => {
+    try {
+      const options = {
+        shortTTL: parseInt(req.body.short_ttl) || 10,
+        mediumTTL: parseInt(req.body.medium_ttl) || 30,
+        longTTL: parseInt(req.body.long_ttl) || 60,
+        checkInterval: parseInt(req.body.check_interval) || 5,
+      };
+
+      // Return immediately with a job ID
+      const testId = Date.now().toString();
+
+      // Start the test in the background
+      res.status(202).json(
+        new ApiResponse(
+          202,
+          {
+            test_id: testId,
+            options,
+            status: 'running',
+            check_status_url: `/api/cache/admin/test/status?test_id=${testId}`,
+          },
+          'TTL test started'
+        )
+      );
+
+      // Run the test asynchronously
+      cacheTestingService
+        .runComprehensiveTTLTest(options)
+        .then(results => {
+          logger.info(`TTL test completed: ${testId}`, { success: results.success });
+        })
+        .catch(error => {
+          logger.error(`TTL test failed: ${testId}`, error);
+        });
+    } catch (error) {
+      logger.error('Error starting TTL test:', error);
+      return res.status(500).json(new ApiResponse(500, null, 'Failed to start TTL test'));
+    }
+  })
+);
+
+/**
+ * POST /api/cache/admin/test/performance
+ * Run a cache performance test (admin only)
+ */
+router.post(
+  '/admin/test/performance',
+  asyncHandler(async (req, res) => {
+    try {
+      const options = {
+        writeCount: parseInt(req.body.write_count) || 100,
+        readCount: parseInt(req.body.read_count) || 100,
+        payloadSizeBytes: parseInt(req.body.payload_size_bytes) || 1024,
+        randomAccess: req.body.random_access !== 'false',
+      };
+
+      // Return immediately with a job ID
+      const testId = Date.now().toString();
+
+      // Start the test in the background
+      res.status(202).json(
+        new ApiResponse(
+          202,
+          {
+            test_id: testId,
+            options,
+            status: 'running',
+            check_status_url: `/api/cache/admin/test/status?test_id=${testId}`,
+          },
+          'Performance test started'
+        )
+      );
+
+      // Run the test asynchronously
+      cacheTestingService
+        .testPerformance(options)
+        .then(results => {
+          logger.info(`Performance test completed: ${testId}`);
+        })
+        .catch(error => {
+          logger.error(`Performance test failed: ${testId}`, error);
+        });
+    } catch (error) {
+      logger.error('Error starting performance test:', error);
+      return res.status(500).json(new ApiResponse(500, null, 'Failed to start performance test'));
+    }
+  })
+);
+
+/**
+ * POST /api/cache/admin/test/cleanup
+ * Clean up test data (admin only)
+ */
+router.post(
+  '/admin/test/cleanup',
+  asyncHandler(async (req, res) => {
+    try {
+      const testId = req.body.test_id || null;
+      const result = await cacheTestingService.cleanupTestData(testId);
+
+      return res
+        .status(200)
+        .json(
+          new ApiResponse(200, result, `Cleaned up ${result.deleted_count} test cache entries`)
+        );
+    } catch (error) {
+      logger.error('Error cleaning up test data:', error);
+      return res.status(500).json(new ApiResponse(500, null, 'Failed to clean up test data'));
+    }
+  })
+);
 
 export default router;

@@ -209,7 +209,6 @@ class CacheService {
       return 0;
     }
   }
-
   /**
    * Update access statistics
    */
