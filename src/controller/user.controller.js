@@ -41,6 +41,8 @@ export const loginUser = asyncHandler(async (req, res) => {
   // req.validatedData contains the data that has been validated by the middleware
   const { username, password } = req.validatedData || req.body;
 
+  console.log(username, password);
+
   // Get user with password field included
   const user = await prisma.user.findUnique({
     where: {
@@ -63,9 +65,13 @@ export const loginUser = asyncHandler(async (req, res) => {
   const isPasswordValid = await bcrypt.compare(password, user.password);
 
   if (!isPasswordValid) {
+    console.log('Something is here');
     throw new ApiError(401, 'Invalid credentials');
   }
-  const Token = generateToken(username);
+  console.log('User is here', isPasswordValid);
+  console.log('User is here', user);
+
+  const Token = await generateToken(username);
 
   // Remove password from user object
   // eslint-disable-next-line no-unused-vars
@@ -76,6 +82,7 @@ export const loginUser = asyncHandler(async (req, res) => {
     secure: true,
   };
 
+  console.log('Something is here2');
   return res
     .status(200)
     .cookie('Token', Token, options)
@@ -87,9 +94,10 @@ export const logOut = asyncHandler(async (req, res) => {
     httpOnly: true,
     secure: true,
   };
+  console.log('logged out');
   return res
     .status(200)
-    .clearCookie('token', options)
+    .clearCookie('Token', options)
     .json(new ApiResponse(200, {}, 'user Logged out successfully'));
 });
 

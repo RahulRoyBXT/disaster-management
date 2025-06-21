@@ -3,6 +3,7 @@ import multer from 'multer';
 import {
   createReport,
   deleteReport,
+  getAllReports,
   getReport,
   updateReport,
 } from '../controller/report.controller.js';
@@ -22,6 +23,7 @@ router.use(verifyJWT);
 router.route('/create').post(upload.none(), validateRequest(createReportSchema), createReport);
 
 // get a report, update an existing report, or delete a report
+router.get('/', getAllReports);
 router
   .route('/:id')
   .get(validateParams(reportIdParamSchema), getReport)

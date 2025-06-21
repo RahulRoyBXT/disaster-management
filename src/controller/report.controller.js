@@ -7,6 +7,22 @@ const Prisma = new PrismaClient();
 
 // TODO: check all controller
 
+export const getAllReports = asyncHandler(async (req, res) => {
+  const reports = await Prisma.report.findMany({
+    where: {},
+    include: {
+      user: true,
+      disaster: true,
+    },
+  });
+
+  if (!reports || reports.length === 0) {
+    throw new ApiError(404, 'No reports found');
+  }
+
+  return res.status(200).json(new ApiResponse(200, reports, 'Reports retrieved successfully'));
+});
+
 export const createReport = asyncHandler(async (req, res) => {
   // Get validated data from middleware
   const { disasterId, content, imageURL } = req.validatedData || req.body;
@@ -54,11 +70,11 @@ export const getReport = asyncHandler(async (req, res) => {
 export const updateReport = asyncHandler(async (req, res) => {
   // Get validated data and params from middleware
   const { id } = req.validatedParams || req.params;
-  const { content, imageUrl } = req.validatedData || req.body;
+  const { content, imageUrl, locationName, title } = req.validatedData || req.body;
 
   const report = await Prisma.report.update({
     where: { id },
-    data: { content, imageUrl },
+    data: { content, imageUrl, locationName, title },
   });
 
   return res.status(200).json(new ApiResponse(200, report, 'Report updated successfully'));

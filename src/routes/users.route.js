@@ -16,7 +16,7 @@ const upload = multer();
 
 const router = express.Router();
 
-router.route('/profile').post(verifyJWT, getUserProfile);
+router.route('/profile').get(verifyJWT, getUserProfile);
 
 router
   .route('/register')

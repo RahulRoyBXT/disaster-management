@@ -14,99 +14,76 @@ const getSocket = req => {
 };
 
 export const getAllDisasters = asyncHandler(async (req, res) => {
-  try {
-    const disaster = await Prisma.disaster.findMany();
+  const disaster = await Prisma.disaster.findMany();
 
-    if (!disaster || disaster.length === 0) {
-      throw new ApiError(400, 'No Disaster Found');
-    }
-    console.log('all disaster', disaster);
-    res.status(200).json(new ApiResponse(200, disaster, 'Disaster fetched'));
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: 'Failed to fetch disasters',
-    });
+  if (!disaster || disaster.length === 0) {
+    throw new ApiError(400, 'No Disaster Found');
   }
+  console.log('all disaster', disaster);
+  res.status(200).json(new ApiResponse(200, disaster, 'Disaster fetched'));
 });
 
 export const getDisasterById = asyncHandler(async (req, res) => {
-  try {
-    const disasterId = req.params.id;
-    if (!disasterId) {
-      throw new ApiError(400, 'Disaster id is required');
-    }
-    const disaster = await Prisma.disaster.findUnique({
-      where: {
-        id: disasterId,
-      },
-    });
-    if (!disaster) {
-      throw new ApiError(404, 'No Disaster Found');
-    }
-    res.status(200).json(new ApiResponse(200, disaster, 'Disaster Found successfully'));
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: 'Failed to fetch disaster',
-    });
+  const disasterId = req.params.id;
+  if (!disasterId) {
+    throw new ApiError(400, 'Disaster id is required');
   }
+  const disaster = await Prisma.disaster.findUnique({
+    where: {
+      id: disasterId,
+    },
+  });
+  if (!disaster) {
+    throw new ApiError(404, 'No Disaster Found');
+  }
+  res.status(200).json(new ApiResponse(200, disaster, 'Disaster Found successfully'));
 });
 
 // Create Disaster
 export const createDisaster = asyncHandler(async (req, res) => {
-  try {
-    const { title, locationName, description, tags } = req.body;
-    console.log(req.user.id);
-    if (!title || !locationName || !description || !tags) {
-      throw new ApiError(400, 'All fields are required');
-    }
-
-    const FilteredLocationName = await rawLocationToLocationData({
-      locationName: locationName.toString(),
-      description: description.toString(),
-    });
-
-    if (!FilteredLocationName) {
-      throw new ApiError(400, 'Invalid location name provided');
-    }
-
-    const { lat, lng } = await locationToGeoCode(FilteredLocationName);
-
-    const disaster = await Prisma.disaster.create({
-      data: {
-        title,
-        owner: {
-          connect: { id: req.user.id },
-        },
-        locationName: FilteredLocationName,
-        latitude: parseFloat(lat),
-        longitude: parseFloat(lng),
-        description,
-        tags,
-      },
-    });
-
-    // Emit disaster_created event using socket.io
-    const io = getSocket(req);
-    if (io) {
-      io.emit('disaster_created', {
-        event: 'disaster_created',
-        data: disaster,
-        message: `New disaster reported: ${disaster.title}`,
-        timestamp: new Date().toISOString(),
-      });
-    }
-
-    return res.status(201).json(new ApiResponse(201, disaster, 'Disaster Created successfully'));
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: 'Failed to fetch disasters',
-    });
-
-    throw new ApiError(500, error.message);
+  const { title, locationName, description, tags } = req.body;
+  console.log(req.user.id);
+  if (!title || !locationName || !description || !tags) {
+    throw new ApiError(400, 'All fields are required');
   }
+
+  const FilteredLocationName = await rawLocationToLocationData({
+    locationName: locationName.toString(),
+    description: description.toString(),
+  });
+
+  if (!FilteredLocationName) {
+    throw new ApiError(400, 'Invalid location name provided');
+  }
+
+  const { lat, lng } = await locationToGeoCode(FilteredLocationName);
+
+  const disaster = await Prisma.disaster.create({
+    data: {
+      title,
+      owner: {
+        connect: { id: req.user.id },
+      },
+      locationName: FilteredLocationName,
+      latitude: parseFloat(lat),
+      longitude: parseFloat(lng),
+      description,
+      tags,
+    },
+  });
+
+  // Emit disaster_created event using socket.io
+  const io = getSocket(req);
+  if (io) {
+    io.emit('disaster_created', {
+      event: 'disaster_created',
+      data: disaster,
+      message: `New disaster reported: ${disaster.title}`,
+      timestamp: new Date().toISOString(),
+    });
+  }
+
+  return res.status(201).json(new ApiResponse(201, disaster, 'Disaster Created successfully'));
 });
 
 // Update a disaster
