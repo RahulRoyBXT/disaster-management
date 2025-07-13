@@ -1,12 +1,12 @@
 {
   // Enhanced Editor Configuration
-  "editor.formatOnSave": true,
+  // "editor.formatOnSave": true,
   "editor.formatOnPaste": true,
   "editor.formatOnType": false,
-  "editor.codeActionsOnSave": {
-    "source.fixAll.eslint": "explicit",
-    "source.organizeImports": "explicit"
-  },
+  // "editor.codeActionsOnSave": {
+  //   "source.fixAll.eslint": "explicit",
+  //   "source.organizeImports": "explicit"
+  // },
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   "editor.tabSize": 2,
   "editor.insertSpaces": true,
@@ -99,8 +99,8 @@
     "**/dist": true,
     "**/build": true,
     "**/.tmp": true,
-    "**/logs": true,
-    "**/*.log": true
+    // "**/logs": true,
+    // "**/*.log": true
   },
   "files.watcherExclude": {
     "**/.git/objects/**": true,
